@@ -2,7 +2,7 @@ import { View, Text, TouchableOpacity } from "react-native";
 import React from "react";
 
 const CustomButton = ({
-  tittle,
+  title,
   handlePress,
   isLoading,
   containerStyles,
@@ -15,7 +15,7 @@ const CustomButton = ({
       activeOpacity={0.7}
     >
       <Text className={`text-primary font-pbold text-lg ${textStyles}`}>
-        {tittle}
+        {title}
       </Text>
     </TouchableOpacity>
   );

@@ -35,7 +35,7 @@ const index = () => {
           </View>
             <Text className='text-gray-100 text-center text-xl font-pregular mt-10'>Where creativity meets innovation:Embark on a journey of limitless Exploration with Aora</Text>
           <CustomButton
-          tittle="Continue with Email"
+          title="Continue with Email"
           handlePress={()=>router.push('/signIn')}
           containerStyles="w-full mt-7"
           />
