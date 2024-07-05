@@ -4,7 +4,6 @@ import { Link, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { images } from "../constants";
-import { Button } from "react-native-paper";
 import CustomButton from "../components/CustomButton";
 
 const index = () => {
