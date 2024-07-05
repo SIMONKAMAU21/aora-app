@@ -5,16 +5,17 @@ import { images } from "../../constants";
 import Inputs from "../../components/InputFields";
 import CustomButton from "../../components/CustomButton";
 import { Link } from "expo-router";
+import { createUser } from "../../lib/appwrite";
 
 const signUp = () => {
   const [form, setForm] = useState({
     username:"",
     password:"",
-    Email:""
+    email:""
   })
   const [loading ,setLoading]= useState(false)
   const submit = () => {
-
+createUser();
   }
   return (
     <SafeAreaView className="bg-primary h-full">
