@@ -5,7 +5,7 @@ import { images } from "../../constants";
 import Inputs from "../../components/InputFields";
 import CustomButton from "../../components/CustomButton";
 import { Link, router } from "expo-router";
-import { signIn } from "../../lib/appwrite";
+import { signIn,getAllUsers } from "../../lib/appwrite";
 
 const Signin = () => {
   const [form, setForm] = useState({
@@ -22,12 +22,14 @@ const Signin = () => {
     setLoading(true);
     try {
       await signIn(form.email, form.password);
+      // set it as global state...
       router.replace('/Home');
     } catch (error) {
       Alert.alert("Error", error.message);
     } finally {
       setLoading(false);
     }
+    // getAllUsers()
   };
 
   return (

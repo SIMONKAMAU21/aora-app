@@ -1,13 +1,31 @@
 import { View, Text, ScrollView, Image } from "react-native";
-import React from "react";
-import { Link, router } from "expo-router";
+import React, { useEffect } from "react";
+import { Link, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { images } from "../constants";
 import { Button } from "react-native-paper";
 import CustomButton from "../components/CustomButton";
+import { getCurrentUser } from "../lib/appwrite";
 
-const index = () => {
+const Index = () => {
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const user = await getCurrentUser();
+        if (user) {
+          router.push('/Home'); // Adjust the path to your home page
+        }
+      } catch (error) {
+        console.error("Failed to get current user", error);
+      }
+    };
+
+    checkUser();
+  }, []);
+
   return (
     <SafeAreaView className="bg-primary h-full">
       <ScrollView contentContainerStyle={{ height: "100%" }}>
@@ -23,21 +41,23 @@ const index = () => {
           />
           <View className="relative mt-5">
             <Text className="text-4xl text-white font-bold text-center">
-              Discover Endless 
+              Discover Endless
                Posibilities with{" "}
               <Text className="text-secondary-200">Aora</Text>
             </Text>
             <Image
-            source={images.path}
-            className="w-[136px] h-[15px] absolute -bottom-2 -right-8"
-            resizeMode="contain"
+              source={images.path}
+              className="w-[136px] h-[15px] absolute -bottom-2 -right-8"
+              resizeMode="contain"
             />
           </View>
-            <Text className='text-gray-100 text-center text-xl font-pregular mt-10'>Where creativity meets innovation:Embark on a journey of limitless Exploration with Aora</Text>
+          <Text className='text-gray-100 text-center text-xl font-pregular mt-10'>
+            Where creativity meets innovation: Embark on a journey of limitless Exploration with Aora
+          </Text>
           <CustomButton
-          title="Continue with Email"
-          handlePress={()=>router.push('/signIn')}
-          containerStyles="w-full mt-7"
+            title="Continue with Email"
+            handlePress={() => router.push('/signIn')}
+            containerStyles="w-full mt-7"
           />
         </View>
       </ScrollView>
@@ -46,4 +66,4 @@ const index = () => {
   );
 };
 
-export default index;
+export default Index;
