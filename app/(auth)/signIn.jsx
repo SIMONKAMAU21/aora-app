@@ -1,47 +1,64 @@
-import { View, Text, ScrollView, Image, Alert } from "react-native";
-import React, { useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { images } from "../../constants";
-import Inputs from "../../components/InputFields";
-import CustomButton from "../../components/CustomButton";
+import { useState } from "react";
 import { Link, router } from "expo-router";
-import { signIn,getAllUsers } from "../../lib/appwrite";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { View, Text, ScrollView, Dimensions, Alert, Image } from "react-native";
+
+import { images } from "../../constants";
+import { getCurrentUser, signIn } from "../../lib/appwrite";
+import CustomButton from "../../components/CustomButton";
+import Inputs from "../../components/InputFields";
+import { useGlobalContext } from "../../authContext";
 
 const Signin = () => {
+  const { setUser, setIsLogged } = useGlobalContext();
+  const [isSubmitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
+    email: "",
     password: "",
-    email: ""
   });
-  const [loading, setLoading] = useState(false);
 
   const submit = async () => {
-    if (!form.password || !form.email) {
-      Alert.alert("Error", "Please fill all fields");
+    if (form.email === "" || form.password === "") {
+      Alert.alert("Error", "Please fill in all fields");
       return;
     }
-    setLoading(true);
+
+    setSubmitting(true);
+
     try {
       await signIn(form.email, form.password);
-      // set it as global state...
-      router.replace('/Home');
+      const result = await getCurrentUser();
+      setUser(result);
+      setIsLogged(true);
+
+      Alert.alert("Success", "User signed in successfully");
+      router.replace("/Home");
     } catch (error) {
       Alert.alert("Error", error.message);
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
-    // getAllUsers()
   };
 
   return (
     <SafeAreaView className="bg-primary h-full">
       <ScrollView>
-        <View className="w-full h-[95vh] my-6 px-4">
+        <View
+          className="w-full flex justify-center h-full px-4 my-6"
+          style={{
+            minHeight: Dimensions.get("window").height - 100,
+          }}
+        >
           <Image
             source={images.logo}
-            className="w-[115px] h-[35px]"
             resizeMode="contain"
+            className="w-[115px] h-[34px]"
           />
-          <Text className="text-white text-2xl font-pbold mt-20">Sign in</Text>
+
+          <Text className="text-2xl font-semibold text-white mt-10 font-psemibold">
+            Log in to Aora
+          </Text>
+
           <Inputs
             label="Email"
             value={form.email}
@@ -49,24 +66,32 @@ const Signin = () => {
             otherStyles="mt-7"
             keyboardType="email-address"
           />
+
           <Inputs
             label="Password"
             value={form.password}
             handleChangeText={(e) => setForm({ ...form, password: e })}
-            otherStyles="mt-9"
+            otherStyles="mt-7"
             secureTextEntry
           />
+
           <CustomButton
-            title="Sign in"
-            containerStyles="mt-7"
-            loading={loading}
+            title="Sign In"
             handlePress={submit}
+            containerStyles="mt-7"
+            isLoading={isSubmitting}
           />
-          <View className='justify-center gap-2 pt-5 flex-row'>
-            <Text className='text-gray-100 text-xl'>
+
+          <View className="flex justify-center pt-5 flex-row gap-2">
+            <Text className="text-lg text-gray-100 font-pregular">
               Don't have an account?
             </Text>
-            <Link href='/signUp' className="text-secondary text-lg">Sign up</Link>
+            <Link
+              href="/sign-up"
+              className="text-lg font-psemibold text-secondary"
+            >
+              Signup
+            </Link>
           </View>
         </View>
       </ScrollView>

@@ -3,6 +3,7 @@ import 'react-native-reanimated';
 import { PaperProvider } from 'react-native-paper';
 import { useFonts } from 'expo-font';
 import { useEffect } from 'react';
+import GlobalProvider from '../authContext';
 
 SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
@@ -24,6 +25,9 @@ if(fonstLoaded) SplashScreen.hideAsync()
 },[fonstLoaded,error])
 if(!fonstLoaded && !error) return null;
   return (
+    <GlobalProvider>
+
+
    <PaperProvider>
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -31,5 +35,6 @@ if(!fonstLoaded && !error) return null;
         <Stack.Screen name='(tabs)' options={{headerShown:false}}/>
       </Stack>
    </PaperProvider>
+    </GlobalProvider>
   );
 }
