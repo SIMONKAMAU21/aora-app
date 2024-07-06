@@ -12,14 +12,14 @@ import { images } from "../../constants";
 import Trendingvideos from "../../components/Trendingvideos";
 import Empty from "../../components/Empty";
 import { useEffect, useState } from "react";
-import { getPosts } from "../../lib/appwrite";
+import { getLatestPosts, getPosts } from "../../lib/appwrite";
 import useAppwrite from "../../lib/useAppwrite";
 import Video from "../../components/Video";
 
 export default function HomeScreen() {
   const { data: posts, isLoading, refetch } = useAppwrite(getPosts);
+  const { data: latestPosts } = useAppwrite(getLatestPosts);
 
-  console.log("posts", posts);
   const [refreshing, setreFreshing] = useState(false);
 
   const onRefresh = async () => {
@@ -55,7 +55,7 @@ export default function HomeScreen() {
             <Searchbar placeholder="search here..." />
             <View>
               <Text className="text-lg font-pregular">Trending videos</Text>
-              <Trendingvideos posts={[{ id: 1 }, { id: 2 }, { id: 3 }] ?? []} />
+              <Trendingvideos posts={latestPosts ?? []} />
             </View>
           </View>
         )}
