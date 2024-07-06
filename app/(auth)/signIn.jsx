@@ -11,7 +11,7 @@ import { useGlobalContext } from "../../authContext";
 
 const Signin = () => {
   const { setUser, setIsLogged } = useGlobalContext();
-  const [isSubmitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -23,7 +23,7 @@ const Signin = () => {
       return;
     }
 
-    setSubmitting(true);
+    setLoading(true);
 
     try {
       await signIn(form.email, form.password);
@@ -36,7 +36,7 @@ const Signin = () => {
     } catch (error) {
       Alert.alert("Error", error.message);
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
   };
 
@@ -79,7 +79,7 @@ const Signin = () => {
             title="Sign In"
             handlePress={submit}
             containerStyles="mt-7"
-            isLoading={isSubmitting}
+            loading={loading}
           />
 
           <View className="flex justify-center pt-5 flex-row gap-2">
@@ -87,7 +87,7 @@ const Signin = () => {
               Don't have an account?
             </Text>
             <Link
-              href="/sign-up"
+              href="/signUp"
               className="text-lg font-psemibold text-secondary"
             >
               Signup
