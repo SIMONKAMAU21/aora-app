@@ -1,4 +1,4 @@
-import { FlatList, Image, RefreshControl, SafeAreaView, View } from "react-native";
+import { Alert, FlatList, Image, RefreshControl, SafeAreaView, View } from "react-native";
 import { Text, Searchbar, ActivityIndicator } from "react-native-paper";
 import { images } from "../../constants";
 import Trendingvideos from "../../components/Trendingvideos";
@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import { getLatestPosts, getPosts, getCurrentUser } from "../../lib/appwrite"; // Import getCurrentUser
 import useAppwrite from "../../lib/useAppwrite";
 import Videos from "../../components/Video";
+import SearchPage from "../../components/Search";
+import Search from "../../components/Search";
 
 export default function HomeScreen() {
   const { data: posts, isLoading, refetch } = useAppwrite(getPosts);
@@ -14,7 +16,6 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [username, setUsername] = useState("User"); // State to hold username
 
-  // Fetch current user information on component mount
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
@@ -35,9 +36,7 @@ export default function HomeScreen() {
     await refetch();
     setRefreshing(false);
   };
-if(isLoading){
-  <ActivityIndicator/>
-}
+
   return (
     <SafeAreaView style={{ flex: 1, justifyContent: "center", backgroundColor: "black" }}>
       <FlatList
@@ -60,10 +59,7 @@ if(isLoading){
                 />
               </View>
             </View>
-            <Searchbar placeholder="Search here..."
-            
-            
-            />
+            <Search/>
             <View>
               <Text style={{ fontSize: 20, fontWeight: "500", color: "white", marginTop: 20 }}>Trending videos</Text>
               <Trendingvideos posts={latestPosts ?? []} />
