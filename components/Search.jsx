@@ -1,10 +1,11 @@
 import { View, Text, Alert } from 'react-native';
 import React, { useState } from 'react';
-import { Searchbar } from 'react-native-paper';
+import { ActivityIndicator, Searchbar } from 'react-native-paper';
 import { router, usePathname } from 'expo-router';
 
-const Search = () => {
-  const [query, setQuery] = useState('');
+const Search = ({ initialQuery }) => {
+  const [query, setQuery] = useState(initialQuery || '');
+  const [loading, setLoading] = useState(false)
   const pathName = usePathname();
 
   const handleSearch = () => {
@@ -12,19 +13,32 @@ const Search = () => {
       return Alert.alert('Oops', 'Please enter something');
     }
     if (pathName.startsWith('/Search')) {
+      setLoading(true)
       router.setParams({ query });
+      setTimeout(() => {
+        setQuery('');
+      }, 100); 
+      setLoading(false)
     } else {
       router.push(`/Search/${query}`);
+      setTimeout(() => {
+        setQuery('');
+      }, 100); 
     }
   };
 
   return (
-    <Searchbar
+   <View className='items-center'>
+     <Searchbar
       value={query}
-      onChangeText={(text) => setQuery(text)} 
+      onChangeText={(text) => setQuery(text)}
       placeholder="Type to search...."
-      onSubmitEditing={handleSearch} 
+      onSubmitEditing={handleSearch}
     />
+    {loading && (
+      <ActivityIndicator size={"large"} color='red'/>
+    )}
+   </View>
   );
 };
 
