@@ -1,5 +1,5 @@
 import { FlatList, Image, RefreshControl, SafeAreaView, View } from "react-native";
-import { Text, Searchbar } from "react-native-paper";
+import { Text, Searchbar, ActivityIndicator } from "react-native-paper";
 import { images } from "../../constants";
 import Trendingvideos from "../../components/Trendingvideos";
 import Empty from "../../components/Empty";
@@ -35,10 +35,13 @@ export default function HomeScreen() {
     await refetch();
     setRefreshing(false);
   };
-
+if(isLoading){
+  <ActivityIndicator/>
+}
   return (
     <SafeAreaView style={{ flex: 1, justifyContent: "center", backgroundColor: "black" }}>
       <FlatList
+      
         data={posts}
         keyExtractor={(item) => item.$id}
         renderItem={({ item }) => <Videos Video={item} />}
@@ -57,7 +60,10 @@ export default function HomeScreen() {
                 />
               </View>
             </View>
-            <Searchbar placeholder="Search here..." />
+            <Searchbar placeholder="Search here..."
+            
+            
+            />
             <View>
               <Text style={{ fontSize: 20, fontWeight: "500", color: "white", marginTop: 20 }}>Trending videos</Text>
               <Trendingvideos posts={latestPosts ?? []} />
