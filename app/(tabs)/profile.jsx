@@ -9,19 +9,26 @@ import {
   View,
 } from "react-native";
 import React, { useEffect } from "react";
-import { getUserposts, searchPosts } from "../../lib/appwrite";
+import { getUserposts, searchPosts, signOut } from "../../lib/appwrite";
 import Empty from "../../components/Empty";
 import useAppwrite from "../../lib/useAppwrite";
 import { icons } from "../../constants";
 import Videos from "../../components/Video";
 import { useGlobalContext } from "../../authContext";
 import Infobox from "../../components/Infobox";
+import { router } from "expo-router";
 
 const profile = () => {
   const { user, isLogged, setUser, setIsLogged } = useGlobalContext();
   const { data: posts } = useAppwrite(() => getUserposts(user.$id));
 
-  const logOut = () => {};
+  const logOut = async() => {
+await signOut()
+setUser(null);
+setIsLogged(false)
+router.replace('/signIn')
+
+  };
   return (
     <SafeAreaView
       className='flex-1 justify-center bg-primary'
@@ -35,7 +42,7 @@ const profile = () => {
             style={{ marginTop: 20, padding: 20 }}
             className="w-full"
           >
-            <TouchableOpacity onPress={{ logOut }} className="items-end w-full">
+            <TouchableOpacity onPress={logOut} className="items-end w-full">
               <Image
                 source={icons.logout}
                 style={{ width: 30, height: 40 }}

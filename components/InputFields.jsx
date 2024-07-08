@@ -5,7 +5,7 @@ import { TextInput } from 'react-native-paper'
 const Inputs = ({ label, placeholder, value, handleChangeText, otherStyles, secureTextEntry, ...props }) => {
   return (
     <View className={`text-white ${otherStyles}`}>
-      <Text className='text-white'>{label}</Text>
+      <Text className='text-white mt-4'>{label}</Text>
       <View style={{ marginTop:8 }}>
         <TextInput
           label={label}

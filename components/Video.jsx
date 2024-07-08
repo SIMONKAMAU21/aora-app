@@ -1,24 +1,27 @@
 import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Video } from 'expo-av';
-import { WebView } from 'react-native-webview';
 import { icons } from '../constants';
 
 const Videos = ({ Video: { title, thumbnail, video, creator } }) => {
-  const avatar = creator?.avatar || 'default-avatar-url'; // Provide a default avatar URL if avatar is null or undefined
-  const username = creator?.username || 'Unknown'; // Provide a default username if username is null or undefined
+  const avatar = creator?.avatar || 'default-avatar-url';
+  const username = creator?.username || 'Unknown';
   const [play, setPlay] = useState(false);
+  const videoRef = React.useRef(null);
+
+  console.log("Video URL:", video);
+  console.log("Play State:", play);
 
   return (
     <View className="mt-10">
       <View className="flex-row items-center gap-y-1">
-      <View style={{ width: 40, marginLeft:10, height: 40, borderRadius: 40, overflow: 'hidden', borderWidth: 1, borderColor: '#ccc' }}>
-      <Image
-        source={{ uri: avatar }}
-        style={{ width: '100%', height: '100%' }}
-        resizeMode="cover"
-      />
-    </View>
+        <View style={{ width: 40, marginLeft: 10, height: 40, borderRadius: 40, overflow: 'hidden', borderWidth: 1, borderColor: '#ccc' }}>
+          <Image
+            source={{ uri: avatar }}
+            style={{ width: '100%', height: '100%' }}
+            resizeMode="cover"
+          />
+        </View>
         <View className="flex-1 ml-4">
           <Text className="text-white font-semibold">{title}</Text>
           <Text className="text-white" numberOfLines={1}>
@@ -34,25 +37,33 @@ const Videos = ({ Video: { title, thumbnail, video, creator } }) => {
         </View>
       </View>
       {play ? (
-        <WebView
-          style={{ width: '100%', height: 300, borderRadius: 10, marginTop: 10, marginLeft:20 }}
-          javaScriptEnabled={true}
-          domStorageEnabled={true}
+        <Video
+          ref={videoRef}
           source={{ uri: video }}
+          style={{ width: '100%', height: 240, borderRadius: 10, marginTop: 10 }}
+          resizeMode="contain"
+          useNativeControls
+          shouldPlay
+          onPlaybackStatusUpdate={(status) => {
+            console.log("Playback Status:", status);
+            if (status.didJustFinish) {
+              setPlay(false);
+            }
+          }}
         />
       ) : (
         <TouchableOpacity
-          className="w-full h-60 rounded-xl mt-3 relative items-center justify-center"
+          style={{ width: '100%', height: 240, borderRadius: 10, marginTop: 10, position: 'relative', justifyContent: 'center', alignItems: 'center' }}
           onPress={() => setPlay(true)}
         >
           <Image
             source={{ uri: thumbnail }}
-            className="w-[390px] h-full rounded-xl"
+            style={{ width: '100%', height: '100%', borderRadius: 10 }}
             resizeMode="cover"
           />
           <Image
             source={icons.play}
-            className="w-12 h-12 absolute"
+            style={{ width: 48, height: 48, position: 'absolute' }}
             resizeMode="contain"
           />
         </TouchableOpacity>

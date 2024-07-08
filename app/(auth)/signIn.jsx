@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Text, ScrollView, Dimensions, Alert, Image } from "react-native";
+import { View, Text, ScrollView, Dimensions, Alert, Image, ToastAndroid } from "react-native";
 
 import { images } from "../../constants";
 import { getCurrentUser, signIn } from "../../lib/appwrite";
@@ -31,7 +31,7 @@ const Signin = () => {
       setUser(result);
       setIsLogged(true);
 
-      Alert.alert("Success", "User signed in successfully");
+      ToastAndroid.show('successfully logged in ',ToastAndroid.SHORT)
       router.replace("/Home");
     } catch (error) {
       Alert.alert("Error", error.message);
