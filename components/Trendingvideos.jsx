@@ -31,10 +31,11 @@ const TrendingItem = ({ activeItem, item, setPlaying, playing }) => {
       duration={500}
     >
       {playing ? (
-         <WebView
+         <Video
          style={{ width: '100%', height: 300, borderRadius: 10, marginTop: 10 }}
-         javaScriptEnabled={true}
-         domStorageEnabled={true}
+         resizeMode="contain"
+         useNativeControls
+         shouldPlay
          source={{ uri:item.video }}
        />
       ) : (

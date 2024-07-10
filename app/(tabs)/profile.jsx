@@ -1,15 +1,12 @@
 import {
-  Alert,
   FlatList,
   Image,
-  RefreshControl,
   SafeAreaView,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useEffect } from "react";
-import { getUserposts, searchPosts, signOut } from "../../lib/appwrite";
+import React from "react";
+import { getUserposts, signOut } from "../../lib/appwrite";
 import Empty from "../../components/Empty";
 import useAppwrite from "../../lib/useAppwrite";
 import { icons } from "../../constants";
@@ -22,26 +19,27 @@ const profile = () => {
   const { user, isLogged, setUser, setIsLogged } = useGlobalContext();
   const { data: posts } = useAppwrite(() => getUserposts(user.$id));
 
-  const logOut = async() => {
-await signOut()
-setUser(null);
-setIsLogged(false)
-router.replace('/signIn')
-
+  const logOut = async () => {
+    await signOut();
+    setUser(null);
+    setIsLogged(false);
+    router.replace("/signIn");
   };
+  const title =()=>{
+    if(posts.length===0){
+      return '0'
+    }else{
+      return "3.1k"
+    }
+  }
   return (
-    <SafeAreaView
-      className='flex-1 justify-center bg-primary'
-    >
+    <SafeAreaView className="flex-1 justify-center bg-primary">
       <FlatList
         data={posts}
         keyExtractor={(item) => item.$id}
         renderItem={({ item }) => <Videos Video={item} />}
         ListHeaderComponent={() => (
-          <View
-            style={{ marginTop: 20, padding: 20 }}
-            className="w-full"
-          >
+          <View style={{ marginTop: 20, padding: 20 }} className="w-full">
             <TouchableOpacity onPress={logOut} className="items-end w-full">
               <Image
                 source={icons.logout}
@@ -70,7 +68,7 @@ router.replace('/signIn')
                   subtitle="Posts"
                   containerStyles="mr-5"
                 />
-                <Infobox title="3.1k" subtitle="views" titleStyles="text-lg" />
+                <Infobox title={title()} subtitle="views" titleStyles="text-lg" />
               </View>
             </View>
           </View>

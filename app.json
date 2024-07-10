@@ -20,8 +20,7 @@
         "foregroundImage": "./assets/images/logo-small.png",
         "backgroundColor": "#ffffff"
       },
-      "package":"com.simon.aora"
-
+      "package": "com.simon.aora"
     },
     "web": {
       "bundler": "metro",
@@ -33,6 +32,20 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "23b765de-f442-4933-bb8d-cbbd0bd5b772"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/23b765de-f442-4933-bb8d-cbbd0bd5b772"
     }
   }
 }
