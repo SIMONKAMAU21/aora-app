@@ -38,9 +38,8 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, justifyContent: "center", backgroundColor: "black" }}>
+    <SafeAreaView style={{ flex: 1, justifyContent: "center", }}className="bg-primary" >
       <FlatList
-      
         data={posts}
         keyExtractor={(item) => item.$id}
         renderItem={({ item }) => <Videos Video={item} />}

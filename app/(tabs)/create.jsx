@@ -32,7 +32,7 @@ const Create = () => {
     const result = await DocumentPicker.getDocumentAsync({
       type:
         selectType === "image"
-          ? ["image/png", "image/jpg","image/thumbnails"]
+          ? ["image/*"]
           : ["video/mp4", "video/gif"],
     });
     if (!result.canceled) {
@@ -146,10 +146,10 @@ const Create = () => {
           </View>
         </View>
         <CustomButton
-          title="Submit & Publish"
           handlePress={submit}
           containerStyles="mt-10"
           isLoading={isUploading}
+          title={"Create & submit"}
         />
       </ScrollView>
     </SafeAreaView>

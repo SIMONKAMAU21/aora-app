@@ -1,16 +1,15 @@
 import React, { useState } from "react";
-import { FlatList, Image, ImageBackground, TouchableOpacity, View } from "react-native";
+import { FlatList, Image, ImageBackground, TouchableOpacity, View, StyleSheet } from "react-native";
 import * as Animatable from "react-native-animatable";
 import { Video } from "expo-av";
 import { icons } from "../constants";
-import WebView from "react-native-webview";
 
 const zoomIn = {
   0: {
     scale: 0.9,
   },
   1: {
-    scale: 1.1,
+    scale: 1,
   },
 };
 
@@ -19,45 +18,38 @@ const zoomOut = {
     scale: 1,
   },
   1: {
-    scale: 0.9,
+    scale: 0.8,
   },
 };
 
 const TrendingItem = ({ activeItem, item, setPlaying, playing }) => {
   return (
     <Animatable.View
-      style={{ marginRight: 3, marginTop: 10 }}
-      animation={activeItem === item?.$id ? zoomIn : zoomOut}
+      style={[styles.trendingItem, activeItem === item.$id && styles.activeItem]}
+      animation={activeItem === item.$id ? zoomIn : zoomOut}
       duration={500}
     >
       {playing ? (
-         <Video
-         style={{ width: '100%', height: 300, borderRadius: 10, marginTop: 10 }}
-         resizeMode="contain"
-         useNativeControls
-         shouldPlay
-         source={{ uri:item.video }}
-       />
+        <Video
+          style={styles.video}
+          resizeMode="contain"
+          useNativeControls
+          shouldPlay
+          source={{ uri: item.video }}
+        />
       ) : (
         <TouchableOpacity
-          style={{
-            width: 240,
-            height: 180,
-            borderRadius: 35,
-            
-            backgroundColor:'white',
-            overflow: "hidden",
-          }}
+          style={styles.thumbnailContainer}
           onPress={() => setPlaying(true)}
         >
           <ImageBackground
             source={{ uri: item.thumbnail }}
-            style={{ width: '100%', height: '100%', overflow: "hidden", borderRadius: 35 }}
+            style={styles.thumbnail}
             resizeMode="cover"
           >
             <Image
               source={icons.play}
-              style={{ width: 50, height: 50, position: "absolute", top: "50%", left: "50%", transform: [{ translateX: -25 }, { translateY: -25 }] }}
+              style={styles.playIcon}
               resizeMode="contain"
             />
           </ImageBackground>
@@ -93,8 +85,50 @@ export default function TrendingVideos({ posts }) {
       viewabilityConfig={{
         itemVisiblePercentThreshold: 70,
       }}
-      contentOffset={{ x: 170 }}
       horizontal
+      contentContainerStyle={styles.flatListContainer}
     />
   );
 }
+
+const styles = StyleSheet.create({
+  trendingItem: {
+    marginRight: 3,
+  },
+  activeItem: {
+  
+  },
+  video: {
+    width: 350,
+    height: 200,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  thumbnailContainer: {
+    width: 350,
+    height: 200,
+    borderRadius: 35,
+    backgroundColor: "white",
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+    borderWidth: 2,
+    // borderColor: "red",
+    padding:"auto"
+  },
+  thumbnail: {
+    width: "100%",
+    height: "100%",
+  },
+  playIcon: {
+    width: 50,
+    height: 50,
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: [{ translateX: -25 }, { translateY: -25 }],
+  },
+  flatListContainer: {
+    paddingLeft: 170,
+  },
+});

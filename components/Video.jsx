@@ -3,7 +3,7 @@ import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { Video } from 'expo-av';
 import { icons } from '../constants';
 
-const Videos = ({ Video: { title, thumbnail, video, creator } }) => {
+const Videos = ({ Video: { prompt,title, thumbnail, video, creator } }) => {
   const avatar = creator?.avatar || 'default-avatar-url';
   const username = creator?.username || 'Unknown';
   const [play, setPlay] = useState(false);
@@ -76,7 +76,8 @@ const Videos = ({ Video: { title, thumbnail, video, creator } }) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 10,
+    marginTop: 20,
+    padding:10
   },
   header: {
     flexDirection: 'row',
