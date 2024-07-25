@@ -76,10 +76,12 @@ const Signin = () => {
           />
 
           <CustomButton
-            title="Sign In"
+            title={loading ? "sign in ...." :"Sign In"}
             handlePress={submit}
             containerStyles="mt-7"
-            loading={loading}
+            isLoading={loading}
+            disabled={loading}
+            textStyles='text-black font-pbold'
           />
 
           <View className="flex justify-center pt-5 flex-row gap-2">

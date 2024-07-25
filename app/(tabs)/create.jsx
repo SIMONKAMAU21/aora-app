@@ -147,9 +147,11 @@ const Create = () => {
         </View>
         <CustomButton
           handlePress={submit}
-          containerStyles="mt-10"
+          containerStyles="mt-10 text-black"
+          textStyles='text-black font-pbold'
           isLoading={isUploading}
-          title={"Create & submit"}
+          title={isUploading ? "uploading...." : "Create & publish"}
+          disabled={isUploading}
         />
       </ScrollView>
     </SafeAreaView>

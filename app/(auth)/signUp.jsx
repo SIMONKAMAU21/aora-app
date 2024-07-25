@@ -63,10 +63,13 @@ const signUp = () => {
                         secureTextEntry
                     />
                     <CustomButton
-                        title="Sign up"
+                        title={submitting ? "submitting...." : "Sign up"}
                         containerStyles="mt-7"
-                        loading={submitting}
+                        isLoading={submitting}
                         handlePress={submit}
+                        disabled={submitting}
+                        textStyles='text-black font-pbold'
+
                     />
                     <View className='justify-center gap-2 pt-5 flex-row'>
                         <Text className='text-gray-100 text-xl'>

@@ -58,6 +58,8 @@ const Index = () => {
             title="Continue with Email"
             handlePress={() => router.push('/signIn')}
             containerStyles="w-full mt-7"
+            textStyles='text-black font-pbold'
+
           />
         </View>
       </ScrollView>
