@@ -1,12 +1,14 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Modal, Button } from 'react-native';
 import { Video } from 'expo-av';
 import { icons } from '../constants';
+import { deleteVideo } from '../lib/appwrite'; // Assuming deleteVideo is implemented
 
-const Videos = ({ Video: { prompt,title, thumbnail, video, creator } }) => {
+const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete }) => {
   const avatar = creator?.avatar || 'default-avatar-url';
   const username = creator?.username || 'Unknown';
   const [play, setPlay] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
   const videoRef = useRef(null);
 
   const handlePlaybackStatusUpdate = (status) => {
@@ -16,8 +18,24 @@ const Videos = ({ Video: { prompt,title, thumbnail, video, creator } }) => {
   };
 
   const handlePlayPress = () => {
-   
     setPlay(true);
+  };
+
+  const handleMenuPress = () => {
+    setModalVisible(true);
+  };
+  const handleDelete = async () => {
+    const videoId = $id
+    try {
+      await deleteVideo(videoId);
+      // Optionally, refresh the video list or handle the deleted state
+      if(onDelete){
+        onDelete()
+      }
+      setModalVisible(false);
+    } catch (error) {
+      console.error("Error deleting video:", error);
+    }
   };
 
   return (
@@ -36,11 +54,13 @@ const Videos = ({ Video: { prompt,title, thumbnail, video, creator } }) => {
             {username}
           </Text>
         </View>
-        <Image
-          source={icons.menu}
-          style={styles.menuIcon}
-          resizeMode="contain"
-        />
+        <TouchableOpacity onPress={handleMenuPress}>
+          <Image
+            source={icons.menu}
+            style={styles.menuIcon}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
       </View>
       {play ? (
         <Video
@@ -70,6 +90,21 @@ const Videos = ({ Video: { prompt,title, thumbnail, video, creator } }) => {
           />
         </TouchableOpacity>
       )}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Options</Text>
+            <Button title="Delete" onPress={handleDelete} />
+            <Button title="Save" onPress={() => { /* Implement save functionality */ }} />
+            <Button title="Cancel" onPress={() => setModalVisible(false)} />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -77,7 +112,7 @@ const Videos = ({ Video: { prompt,title, thumbnail, video, creator } }) => {
 const styles = StyleSheet.create({
   container: {
     marginTop: 20,
-    padding:10
+    padding: 10
   },
   header: {
     flexDirection: 'row',
@@ -135,6 +170,33 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     position: 'absolute',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalView: {
+    width: 300,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
 

@@ -4,6 +4,7 @@ import {
   SafeAreaView,
   TouchableOpacity,
   View,
+  Text
 } from "react-native";
 import React from "react";
 import { getUserposts, signOut } from "../../lib/appwrite";
@@ -40,12 +41,18 @@ const profile = () => {
         renderItem={({ item }) => <Videos Video={item} />}
         ListHeaderComponent={() => (
           <View style={{ marginTop: 20, padding: 20 }} className="w-full">
+            <View>
+              <Text className="text-secondary">
+               built with love and owned by @ simon kamau
+              </Text>
+            </View>
             <TouchableOpacity onPress={logOut} className="items-end w-full">
               <Image
                 source={icons.logout}
                 style={{ width: 30, height: 40 }}
                 resizeMode="contain"
               />
+              <Text>log out</Text>
             </TouchableOpacity>
 
             <View className="items-center justify-center">

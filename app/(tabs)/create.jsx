@@ -18,7 +18,7 @@ import { router } from "expo-router";
 import { createVideo } from "../../lib/appwrite";
 import { useGlobalContext } from "../../authContext";
 
-const Create = () => {
+const Create = (onSuccess) => {
   const { user } = useGlobalContext();
   const [isUploading, setIsUploading] = useState(false);
   const [form, setForm] = useState({
@@ -62,7 +62,6 @@ const Create = () => {
       ToastAndroid.show("Uploaded Successfully", ToastAndroid.LONG);
       router.push("/Home");
     } catch (error) {
-      console.error("Upload error:", error);
       Alert.alert("Error", "Failed to upload. Try again!");
     } finally {
       setForm({
