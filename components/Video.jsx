@@ -1,8 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Modal, Button } from 'react-native';
 import { Video } from 'expo-av';
+import * as FileSystem from 'expo-file-system';
 import { icons } from '../constants';
-import { deleteVideo } from '../lib/appwrite'; // Assuming deleteVideo is implemented
+import { deleteVideo, fetchLikedVideos, saveVideo } from '../lib/appwrite'; 
+import CustomButton from './CustomButton';
 
 const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete }) => {
   const avatar = creator?.avatar || 'default-avatar-url';
@@ -10,6 +12,25 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete }) 
   const [play, setPlay] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const videoRef = useRef(null);
+  const [deleting, setDeleting] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [localVideoUri, setLocalVideoUri] = useState(null);
+
+  useEffect(() => {
+    const loadVideo = async () => {
+      const videoUri = `${FileSystem.documentDirectory}${$id}.mp4`;
+      const fileInfo = await FileSystem.getInfoAsync(videoUri);
+
+      if (fileInfo.exists) {
+        setLocalVideoUri(videoUri);
+      } else {
+        await FileSystem.downloadAsync(video, videoUri);
+        setLocalVideoUri(videoUri);
+      }
+    };
+
+    loadVideo();
+  }, [$id, video]);
 
   const handlePlaybackStatusUpdate = (status) => {
     if (status.didJustFinish) {
@@ -24,17 +45,40 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete }) 
   const handleMenuPress = () => {
     setModalVisible(true);
   };
+
   const handleDelete = async () => {
-    const videoId = $id
+    const videoId = $id;
     try {
+      setDeleting(true);
       await deleteVideo(videoId);
-      // Optionally, refresh the video list or handle the deleted state
-      if(onDelete){
-        onDelete()
+      if (onDelete) {
+        onDelete();
       }
       setModalVisible(false);
     } catch (error) {
+      setDeleting(false);
       console.error("Error deleting video:", error);
+    }
+  };
+
+  const handleSave = async () => {
+    const videoId = $id;
+    try {
+      setSaving(true);
+      await saveVideo(videoId);
+      setModalVisible(false);
+    } catch (error) {
+      setSaving(false);
+      console.error("Error saving video:", error);
+    }
+  };
+
+  const fetch = async () => {
+    try {
+      const video = await fetchLikedVideos();
+      console.log('video', video);
+    } catch (error) {
+      console.log('error', error);
     }
   };
 
@@ -65,11 +109,12 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete }) 
       {play ? (
         <Video
           ref={videoRef}
-          source={{ uri: video }}
+          source={{ uri: localVideoUri || video }}
           style={styles.video}
           resizeMode="contain"
           useNativeControls
           shouldPlay
+          isLooping
           onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
           onError={(error) => console.log("Video Error:", error)}
         />
@@ -99,9 +144,28 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete }) 
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>Options</Text>
-            <Button title="Delete" onPress={handleDelete} />
-            <Button title="Save" onPress={() => { /* Implement save functionality */ }} />
-            <Button title="Cancel" onPress={() => setModalVisible(false)} />
+            <CustomButton
+              title={deleting ? "Deleting..." : "Delete"}
+              handlePress={handleDelete}
+              containerStyles='mt-1'
+              isLoading={deleting}
+              disabled={deleting}
+              textStyles='font-pbold'
+            />
+            <CustomButton
+              title={saving ? "Saving..." : "Save"}
+              handlePress={handleSave}
+              containerStyles='mt-1'
+              textStyles='font-pbold'
+              isLoading={saving}
+              disabled={saving}
+            />
+            <CustomButton
+              title="Cancel"
+              handlePress={fetch}
+              containerStyles='mt-1'
+              textStyles='font-pbold'
+            />
           </View>
         </View>
       </Modal>
@@ -175,14 +239,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
   },
   modalView: {
-    width: 300,
+    width: 350,
     backgroundColor: 'white',
     borderRadius: 10,
     padding: 20,
-    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

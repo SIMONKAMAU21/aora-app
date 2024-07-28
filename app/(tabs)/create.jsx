@@ -17,8 +17,9 @@ import * as DocumentPicker from "expo-document-picker";
 import { router } from "expo-router";
 import { createVideo } from "../../lib/appwrite";
 import { useGlobalContext } from "../../authContext";
+import { FFmpegKit, FFmpegKitConfig } from 'ffmpeg-kit-react-native';
 
-const Create = (onSuccess) => {
+const Create = ({ onSuccess }) => {
   const { user } = useGlobalContext();
   const [isUploading, setIsUploading] = useState(false);
   const [form, setForm] = useState({
@@ -29,24 +30,33 @@ const Create = (onSuccess) => {
   });
 
   const openPicker = async (selectType) => {
-    const result = await DocumentPicker.getDocumentAsync({
-      type:
-        selectType === "image"
-          ? ["image/*"]
-          : ["video/mp4", "video/gif"],
-    });
-    if (!result.canceled) {
-      if (selectType === "image") {
-        setForm({ ...form, thumbnail: result.assets[0] });
-      } else if (selectType === "video") {
-        setForm({ ...form, video: result.assets[0] });
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: selectType === "image" ? ["image/*"] : ["video/mp4", "video/gif"],
+      });
+      if (!result.canceled) {
+        if (selectType === "image") {
+          setForm({ ...form, thumbnail: result.assets[0] });
+        } else if (selectType === "video") {
+          setForm({ ...form, video: result.assets[0] });
+        }
       }
-    } else {
-      setTimeout(() => {
-        Alert.alert("Document", JSON.stringify(result, null, 2));
-      }, 100);
+    } catch (error) {
+      Alert.alert("Error", "Failed to open document picker");
+      console.error("Document Picker Error: ", error);
     }
   };
+
+  // const compressVideo = async (uri) => {
+  //   try {
+  //     const outputUri = uri.replace(/(.+)(\.\w+)$/, '$1_compressed$2');
+  //     await FFmpegKit.execute(`-i ${uri} -vcodec libx264 -acodec aac ${outputUri}`);
+  //     return outputUri;
+  //   } catch (error) {
+  //     console.error('Compression error', error);
+  //     return null;
+  //   }
+  // };
 
   const submit = async () => {
     if (!form.prompt || !form.thumbnail || !form.title || !form.video) {
@@ -55,13 +65,20 @@ const Create = (onSuccess) => {
     }
     setIsUploading(true);
     try {
+      // const compressedVideoUri = await compressVideo(form.video.uri);
+      // if (!compressedVideoUri) {
+      //   throw new Error("Video compression failed");
+      // }
       await createVideo({
         ...form,
+        // video: { ...form.video, uri: compressedVideoUri },
         userId: user.$id,
       });
       ToastAndroid.show("Uploaded Successfully", ToastAndroid.LONG);
       router.push("/Home");
+      if (onSuccess) onSuccess();
     } catch (error) {
+      console.error("Video Upload Error: ", error);
       Alert.alert("Error", "Failed to upload. Try again!");
     } finally {
       setForm({
@@ -77,9 +94,7 @@ const Create = (onSuccess) => {
   return (
     <SafeAreaView className="bg-primary h-full">
       <ScrollView className="px-4 my-6">
-        <Text className="text-white mt-10 font-pbold text-2xl">
-          Upload video
-        </Text>
+        <Text className="text-white mt-10 font-pbold text-2xl">Upload video</Text>
         <View>
           <Inputs
             label="Video Title"
@@ -94,16 +109,13 @@ const Create = (onSuccess) => {
             handleChangeText={(e) => setForm({ ...form, prompt: e })}
           />
           <View className="mt-7 space-y-2">
-            <Text className="text-base text-gray-100 font-pmedium">
-              Upload Video
-            </Text>
+            <Text className="text-base text-gray-100 font-pmedium">Upload Video</Text>
             <TouchableOpacity onPress={() => openPicker("video")}>
               {form.video ? (
                 <Video
                   source={{ uri: form.video.uri }}
                   className="w-full h-64 rounded-xl bg-gray-100"
                   resizeMode={ResizeMode.CONTAIN}
-                 
                 />
               ) : (
                 <View className="w-full h-40 bg-black-100 rounded-2xl justify-center items-center">
@@ -119,9 +131,7 @@ const Create = (onSuccess) => {
             </TouchableOpacity>
           </View>
           <View className="mt-7 space-y-6">
-            <Text className="text-base text-gray-100 font-pmedium">
-              Thumbnail Image
-            </Text>
+            <Text className="text-base text-gray-100 font-pmedium">Thumbnail Image</Text>
             <TouchableOpacity onPress={() => openPicker("image")}>
               {form.thumbnail ? (
                 <Image
@@ -147,9 +157,9 @@ const Create = (onSuccess) => {
         <CustomButton
           handlePress={submit}
           containerStyles="mt-10 text-black"
-          textStyles='text-black font-pbold'
+          textStyles="text-black font-pbold"
           isLoading={isUploading}
-          title={isUploading ? "uploading...." : "Create & publish"}
+          title={isUploading ? "Uploading..." : "Create & Publish"}
           disabled={isUploading}
         />
       </ScrollView>
