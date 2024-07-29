@@ -38,7 +38,7 @@ const profile = () => {
       <FlatList
         data={posts}
         keyExtractor={(item) => item.$id}
-        renderItem={({ item }) => <Videos Video={item} />}
+        renderItem={({ item }) => <Videos Video={item} Delete={"Delete"}/>}
         ListHeaderComponent={() => (
           <View style={{ marginTop: 20, padding: 20 }} className="w-full">
             <View>
@@ -81,7 +81,10 @@ const profile = () => {
           </View>
         )}
         ListEmptyComponent={() => (
-          <Empty title="No videos found" subtitle="Create your first video" />
+          <Empty title="No videos found" subtitle="Create your first video"
+          onPress={()=>router.push('/create')}
+          buttonTitle={"create one"}
+          />
         )}
       />
     </SafeAreaView>

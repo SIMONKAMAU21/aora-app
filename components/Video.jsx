@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Modal, Button } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Modal, ToastAndroid, Alert } from 'react-native';
 import { Video } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import { icons } from '../constants';
-import { deleteVideo, saveVideo } from '../lib/appwrite'; 
+import { deleteVideo, saveVideo, fetchLikedVideos, unsaveVideo, getCurrentUser } from '../lib/appwrite'; 
 import CustomButton from './CustomButton';
 
-const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete }) => {
+const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete, Delete}) => {
   const avatar = creator?.avatar || 'default-avatar-url';
   const username = creator?.username || 'Unknown';
   const [play, setPlay] = useState(false);
@@ -15,6 +15,11 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete }) 
   const [deleting, setDeleting] = useState(false);
   const [saving, setSaving] = useState(false);
   const [localVideoUri, setLocalVideoUri] = useState(null);
+  const [isSaved, setIsSaved] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
+
+
+
 
   useEffect(() => {
     const loadVideo = async () => {
@@ -29,7 +34,31 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete }) 
       }
     };
 
+    const checkIfSaved = async () => {
+      try {
+        const likedVideos = await fetchLikedVideos();
+        const saved = likedVideos.documents.some((doc) => doc.$id === $id);
+        setIsSaved(saved);
+      } catch (error) {
+        console.error("Error checking if video is saved:", error);
+      }
+    };
+
+  
+
+
+    const fetchCurrentUser = async () =>{
+      try {
+        const user = await getCurrentUser()
+        setCurrentUserId(user.$id)
+      } catch (error) {
+        console.error("Error fetching current user:", error);
+  
+      }
+    }
     loadVideo();
+    checkIfSaved();
+    fetchCurrentUser()
   }, [$id, video]);
 
   const handlePlaybackStatusUpdate = (status) => {
@@ -47,17 +76,21 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete }) 
   };
 
   const handleDelete = async () => {
-    const videoId = $id;
+    const videoDocumentId = $id; 
     try {
       setDeleting(true);
-      await deleteVideo(videoId);
+      await deleteVideo(videoDocumentId);
       if (onDelete) {
         onDelete();
       }
+      ToastAndroid.show("Video Deleted successfully",ToastAndroid.LONG)
       setModalVisible(false);
-    } catch (error) {
       setDeleting(false);
-      console.error("Error deleting video:", error);
+    } catch (error) {
+      Alert.alert("Error",error)
+
+    }finally{
+      setDeleting(false)
     }
   };
 
@@ -66,18 +99,37 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete }) 
     try {
       setSaving(true);
       await saveVideo(videoId);
+      setIsSaved(true);
+      ToastAndroid.show("Video saved Successfully",ToastAndroid.LONG)
       setModalVisible(false);
     } catch (error) {
-      console.error("Error saving video:", error);
+      Alert.alert("Error",error)
       setSaving(false);
       setModalVisible(false);
-    }finally{
-      setSaving(false)
+    } finally {
+      setSaving(false);
     }
   };
 
-  const cancel =  () => {
-    setModalVisible(false)
+  const handleUnsave = async () => {
+    const videoId = $id;
+    try {
+      setSaving(true);
+      await unsaveVideo(videoId);
+      setIsSaved(false);
+      ToastAndroid.show("Video unsaved Successfully",ToastAndroid.LONG)
+      setModalVisible(false);
+    } catch (error) {
+      Alert.alert("Error",error)
+      setSaving(false);
+      setModalVisible(false);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const cancel = () => {
+    setModalVisible(false);
   };
 
   return (
@@ -142,22 +194,34 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete }) 
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>Options</Text>
-            <CustomButton
-              title={deleting ? "Deleting..." : "Delete"}
+            {currentUserId === creator.$id && ( <CustomButton
+              title={deleting ? "Deleting..." : 'Delete'}
               handlePress={handleDelete}
               containerStyles='mt-1'
               isLoading={deleting}
               disabled={deleting}
               textStyles='font-pbold'
-            />
-            <CustomButton
-              title={saving ? "Saving..." : "Save"}
-              handlePress={handleSave}
-              containerStyles='mt-1'
-              textStyles='font-pbold'
-              isLoading={saving}
-              disabled={saving}
-            />
+            />)}
+           
+            {isSaved ? (
+              <CustomButton
+                title={saving ? "Unsaving..." : "Remove from saved  videos"}
+                handlePress={handleUnsave}
+                containerStyles='mt-1'
+                textStyles='font-pbold'
+                isLoading={saving}
+                disabled={saving}
+              />
+            ) : (
+              <CustomButton
+                title={saving ? "Saving..." : "Save"}
+                handlePress={handleSave}
+                containerStyles='mt-1'
+                textStyles='font-pbold'
+                isLoading={saving}
+                disabled={saving}
+              />
+            )}
             <CustomButton
               title="Cancel"
               handlePress={cancel}
@@ -187,7 +251,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#ccc',
-    marginLeft: 10,
   },
   avatar: {
     width: '100%',

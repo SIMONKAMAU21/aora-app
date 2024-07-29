@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { Text } from "react-native";
 import React from "react";
 import { Button } from "react-native-paper";
 
@@ -20,8 +20,7 @@ const CustomButton = ({
     disabled={disabled}
     loading={isLoading}
     >
-      <Text className={`${textStyles}`}>      {title}
-      </Text>
+      <Text className={`${textStyles}`}>{title}</Text>
     </Button>
     </>
     

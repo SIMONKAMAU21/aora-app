@@ -16,7 +16,6 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [username, setUsername] = useState("User"); 
 
-
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
@@ -78,6 +77,7 @@ export default function HomeScreen() {
             subtitle="Be the first one to upload a video"
             buttonTitle={"create one"}
             onPress={()=> router.push('/create')}
+            
           />
         )}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
