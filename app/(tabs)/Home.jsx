@@ -8,6 +8,7 @@ import { getLatestPosts, getPosts, getCurrentUser } from "../../lib/appwrite";
 import useAppwrite from "../../lib/useAppwrite";
 import Videos from "../../components/Video";
 import Search from "../../components/Search";
+import { router } from "expo-router";
 
 export default function HomeScreen() {
   const { data: posts, refetch } = useAppwrite(getPosts);
@@ -75,6 +76,8 @@ export default function HomeScreen() {
           <Empty
             title="No videos found"
             subtitle="Be the first one to upload a video"
+            buttonTitle={"create one"}
+            onPress={()=> router.push('/create')}
           />
         )}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}

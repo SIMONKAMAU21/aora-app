@@ -3,7 +3,7 @@ import { View, Text, Image, TouchableOpacity, StyleSheet, Modal, Button } from '
 import { Video } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import { icons } from '../constants';
-import { deleteVideo, fetchLikedVideos, saveVideo } from '../lib/appwrite'; 
+import { deleteVideo, saveVideo } from '../lib/appwrite'; 
 import CustomButton from './CustomButton';
 
 const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete }) => {
@@ -68,18 +68,16 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete }) 
       await saveVideo(videoId);
       setModalVisible(false);
     } catch (error) {
-      setSaving(false);
       console.error("Error saving video:", error);
+      setSaving(false);
+      setModalVisible(false);
+    }finally{
+      setSaving(false)
     }
   };
 
-  const fetch = async () => {
-    try {
-      const video = await fetchLikedVideos();
-      console.log('video', video);
-    } catch (error) {
-      console.log('error', error);
-    }
+  const cancel =  () => {
+    setModalVisible(false)
   };
 
   return (
@@ -162,7 +160,7 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete }) 
             />
             <CustomButton
               title="Cancel"
-              handlePress={fetch}
+              handlePress={cancel}
               containerStyles='mt-1'
               textStyles='font-pbold'
             />

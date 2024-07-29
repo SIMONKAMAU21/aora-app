@@ -1,12 +1,70 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import React from "react";
+import { View, Text, FlatList, StyleSheet, SafeAreaView } from "react-native";
+import { fetchLikedVideos } from "../../lib/appwrite";
+import useAppwrite from "../../lib/useAppwrite";
+import Videos from "../../components/Video"; // Ensure this path is correct
+import Empty from "../../components/Empty";
+import { router } from "expo-router";
 
-const saved = () => {
+const Saved = () => {
+  const { data: savedData, error, isLoading } = useAppwrite(fetchLikedVideos);
+  const saved = savedData?.documents || [];
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer} className="bg-primary">
+        <Text className="text-white">Loading...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text>Error: {error.message}</Text>
+      </View>
+    );
+  }
+
   return (
-    <View>
-      <Text>saved</Text>
-    </View>
-  )
-}
+    <SafeAreaView style={styles.container} className="bg-primary">
+      <FlatList
+        data={saved}
+        keyExtractor={(item) => item.$id}
+        renderItem={({ item }) => <Videos Video={item} />}
+        ListEmptyComponent={() => (
+          <Empty
+            title={"no saved videos"}
+            subtitle="videos saved from home page will appear here"
+            buttonTitle={"save"}
+            onPress={()=> router.push('/Home')}
+          />
+        )}
+        ListHeaderComponent={() => (
+          <View className="mt-5 p-5">
+            <Text className="text-white font-pbold">Saved videos</Text>
+          </View>
+        )}
+      />
+    </SafeAreaView>
+  );
+};
 
-export default saved
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});
+
+export default Saved;
