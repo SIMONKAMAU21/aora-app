@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View, Text, ScrollView, Dimensions, Alert, Image, ToastAndroid } from "react-native";
-
 import { images } from "../../constants";
 import { getCurrentUser, signIn } from "../../lib/appwrite";
 import CustomButton from "../../components/CustomButton";

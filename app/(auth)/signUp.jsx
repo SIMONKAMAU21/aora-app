@@ -7,23 +7,52 @@ import CustomButton from "../../components/CustomButton";
 import { Link, router } from "expo-router";
 import { createUser } from "../../lib/appwrite";
 
-const signUp = () => {
+const SignUp = () => {
     const [form, setForm] = useState({
         username: "",
         password: "",
+        confirmPassword: "",
+        email: ""
+    });
+    const [errors, setErrors] = useState({
+        username: "",
+        password: "",
+        confirmPassword: "",
         email: ""
     });
     const [submitting, setSubmitting] = useState(false);
 
-    const submit = async () => {
-        if (!form.username || !form.password || !form.email) {
-            Alert.alert("Error", "Please fill all fields");
-            return;
+    const validateForm = () => {
+        let valid = true;
+        let newErrors = { username: "", password: "", confirmPassword: "", email: "" };
+
+        if (!form.username) {
+            newErrors.username = "Username is required";
+            valid = false;
         }
+        if (!form.email) {
+            newErrors.email = "Email is required";
+            valid = false;
+        }
+        if (!form.password) {
+            newErrors.password = "Password is required";
+            valid = false;
+        }
+        if (form.password !== form.confirmPassword) {
+            newErrors.confirmPassword = "Passwords do not match";
+            valid = false;
+        }
+
+        setErrors(newErrors);
+        return valid;
+    };
+
+    const submit = async () => {
+        if (!validateForm()) return;
 
         setSubmitting(true);
         try {
-            await createUser(form.email, form.password, form.username);
+            await createUser(form.email, form.password, form.username); // Only `password` is sent here
             router.replace('/Home');
         } catch (error) {
             Alert.alert("Error", error.message);
@@ -48,6 +77,9 @@ const signUp = () => {
                         handleChangeText={(e) => setForm({ ...form, username: e })}
                         otherStyles="mt-7"
                     />
+                    {errors.username ? (
+                        <Text className="text-red-500 mt-2">{errors.username}</Text>
+                    ) : null}
                     <Inputs
                         label="Email"
                         value={form.email}
@@ -55,6 +87,9 @@ const signUp = () => {
                         otherStyles="mt-7"
                         keyboardType="email-address"
                     />
+                    {errors.email ? (
+                        <Text className="text-red-500 mt-2">{errors.email}</Text>
+                    ) : null}
                     <Inputs
                         label="Password"
                         value={form.password}
@@ -62,14 +97,26 @@ const signUp = () => {
                         otherStyles="mt-9"
                         secureTextEntry
                     />
+                    {errors.password ? (
+                        <Text className="text-red-500 mt-2">{errors.password}</Text>
+                    ) : null}
+                    <Inputs
+                        label="Confirm Password"
+                        value={form.confirmPassword}
+                        handleChangeText={(e) => setForm({ ...form, confirmPassword: e })}
+                        otherStyles="mt-9"
+                        secureTextEntry
+                    />
+                    {errors.confirmPassword ? (
+                        <Text className="text-red-500 mt-2">{errors.confirmPassword}</Text>
+                    ) : null}
                     <CustomButton
-                        title={submitting ? "submitting...." : "Sign up"}
+                        title={submitting ? "Submitting...." : "Sign up"}
                         containerStyles="mt-7"
                         isLoading={submitting}
                         handlePress={submit}
                         disabled={submitting}
                         textStyles='text-black font-pbold'
-
                     />
                     <View className='justify-center gap-2 pt-5 flex-row'>
                         <Text className='text-gray-100 text-xl'>
@@ -83,4 +130,4 @@ const signUp = () => {
     );
 };
 
-export default signUp;
+export default SignUp;

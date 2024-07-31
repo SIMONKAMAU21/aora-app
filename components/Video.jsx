@@ -6,11 +6,11 @@ import { icons } from '../constants';
 import { deleteVideo, saveVideo, fetchLikedVideos, unsaveVideo, getCurrentUser } from '../lib/appwrite'; 
 import CustomButton from './CustomButton';
 
-const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete, Delete}) => {
+const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete}) => {
   const avatar = creator?.avatar || 'default-avatar-url';
   const username = creator?.username || 'Unknown';
   const [play, setPlay] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);9
   const videoRef = useRef(null);
   const [deleting, setDeleting] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -40,6 +40,7 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete, De
         const saved = likedVideos.documents.some((doc) => doc.$id === $id);
         setIsSaved(saved);
       } catch (error) {
+        Alert.alert("error",error.message)
         console.error("Error checking if video is saved:", error);
       }
     };
@@ -145,7 +146,7 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete, De
         <View style={styles.infoContainer}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.username} numberOfLines={1}>
-            {username}
+            {username} || 
           </Text>
         </View>
         <TouchableOpacity onPress={handleMenuPress}>

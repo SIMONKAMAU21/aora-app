@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { getCurrentUser } from "./lib/appwrite";
+import { Alert } from "react-native";
+import { router } from "expo-router";
 
 // Create a context for global state management
 const GlobalContext = createContext();
@@ -23,7 +25,9 @@ const GlobalProvider = ({ children }) => {
         }
       })
       .catch((error) => {
+        Alert.alert('error',"please login")
         console.log(error);
+        router.replace("/signIn")
       })
       .finally(() => {
         setLoading(false);
