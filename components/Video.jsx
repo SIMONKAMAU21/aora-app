@@ -1,25 +1,43 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Modal, ToastAndroid, Alert } from 'react-native';
-import { Video } from 'expo-av';
-import * as FileSystem from 'expo-file-system';
-import { icons } from '../constants';
-import { deleteVideo, saveVideo, fetchLikedVideos, unsaveVideo, getCurrentUser } from '../lib/appwrite'; 
-import CustomButton from './CustomButton';
+import React, { useState, useRef, useEffect } from "react";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  Modal,
+  ToastAndroid,
+  Alert,
+} from "react-native";
+import { Video } from "expo-av";
+import * as FileSystem from "expo-file-system";
+import { icons } from "../constants";
+import {
+  deleteVideo,
+  saveVideo,
+  fetchLikedVideos,
+  unsaveVideo,
+  getCurrentUser,
+  videoLikes,
+} from "../lib/appwrite";
+import CustomButton from "./CustomButton";
+import useAppwrite from "../lib/useAppwrite";
 
-const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete}) => {
-  const avatar = creator?.avatar || 'default-avatar-url';
-  const username = creator?.username || 'Unknown';
+const Videos = ({
+  Video: { $id, title, thumbnail, video, creator },
+  onDelete,
+}) => {
+  const avatar = creator?.avatar || "default-avatar-url";
+  const username = creator?.username || "Unknown";
   const [play, setPlay] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);9
+  const [modalVisible, setModalVisible] = useState(false);
   const videoRef = useRef(null);
   const [deleting, setDeleting] = useState(false);
   const [saving, setSaving] = useState(false);
   const [localVideoUri, setLocalVideoUri] = useState(null);
   const [isSaved, setIsSaved] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
-
-
-
+const {data:likes} =useAppwrite(()=>videoLikes($id))
 
   useEffect(() => {
     const loadVideo = async () => {
@@ -40,26 +58,22 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete}) =
         const saved = likedVideos.documents.some((doc) => doc.$id === $id);
         setIsSaved(saved);
       } catch (error) {
-        Alert.alert("error",error.message)
+        Alert.alert("error", error.message);
         console.error("Error checking if video is saved:", error);
       }
     };
 
-  
-
-
-    const fetchCurrentUser = async () =>{
+    const fetchCurrentUser = async () => {
       try {
-        const user = await getCurrentUser()
-        setCurrentUserId(user.$id)
+        const user = await getCurrentUser();
+        setCurrentUserId(user.$id);
       } catch (error) {
         console.error("Error fetching current user:", error);
-  
       }
-    }
+    };
     loadVideo();
     checkIfSaved();
-    fetchCurrentUser()
+    fetchCurrentUser();
   }, [$id, video]);
 
   const handlePlaybackStatusUpdate = (status) => {
@@ -77,34 +91,36 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete}) =
   };
 
   const handleDelete = async () => {
-    const videoDocumentId = $id; 
+    const videoDocumentId = $id;
     try {
       setDeleting(true);
       await deleteVideo(videoDocumentId);
       if (onDelete) {
         onDelete();
       }
-      ToastAndroid.show("Video Deleted successfully",ToastAndroid.LONG)
+      ToastAndroid.show("Video Deleted successfully", ToastAndroid.LONG);
       setModalVisible(false);
       setDeleting(false);
     } catch (error) {
-      Alert.alert("Error",error)
-
-    }finally{
-      setDeleting(false)
+      Alert.alert("Error", error);
+    } finally {
+      setDeleting(false);
     }
   };
 
   const handleSave = async () => {
+    const userID = creator?.accountid;
     const videoId = $id;
+    const uploaderId = userID;
+
     try {
       setSaving(true);
-      await saveVideo(videoId);
+      await saveVideo(videoId, uploaderId);
       setIsSaved(true);
-      ToastAndroid.show("Video saved Successfully",ToastAndroid.LONG)
+      ToastAndroid.show("Video saved Successfully", ToastAndroid.LONG);
       setModalVisible(false);
     } catch (error) {
-      Alert.alert("Error",error)
+      Alert.alert("Error", error);
       setSaving(false);
       setModalVisible(false);
     } finally {
@@ -118,10 +134,10 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete}) =
       setSaving(true);
       await unsaveVideo(videoId);
       setIsSaved(false);
-      ToastAndroid.show("Video unsaved Successfully",ToastAndroid.LONG)
+      ToastAndroid.show("Video unsaved Successfully", ToastAndroid.LONG);
       setModalVisible(false);
     } catch (error) {
-      Alert.alert("Error",error)
+      Alert.alert("Error", error);
       setSaving(false);
       setModalVisible(false);
     } finally {
@@ -130,7 +146,7 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete}) =
   };
 
   const cancel = () => {
-    setModalVisible(false);
+   setModalVisible(false)
   };
 
   return (
@@ -146,7 +162,7 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete}) =
         <View style={styles.infoContainer}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.username} numberOfLines={1}>
-            {username} || 
+            {username} ||
           </Text>
         </View>
         <TouchableOpacity onPress={handleMenuPress}>
@@ -184,6 +200,10 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete}) =
             style={styles.playIcon}
             resizeMode="contain"
           />
+          <View style={{display:"flex"}}>
+          <Text className="text-secondary position-absolute">@user {creator?.accountid} </Text>
+          <Text className="text-secondary text-pbold">{`likes: ${likes}`}</Text>
+          </View>
         </TouchableOpacity>
       )}
       <Modal
@@ -195,21 +215,23 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete}) =
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>Options</Text>
-            {currentUserId === creator.$id && ( <CustomButton
-              title={deleting ? "Deleting..." : 'Delete'}
-              handlePress={handleDelete}
-              containerStyles='mt-1'
-              isLoading={deleting}
-              disabled={deleting}
-              textStyles='font-pbold'
-            />)}
-           
+            {currentUserId === creator.$id && (
+              <CustomButton
+                title={deleting ? "Deleting..." : "Delete"}
+                handlePress={handleDelete}
+                containerStyles="mt-1"
+                isLoading={deleting}
+                disabled={deleting}
+                textStyles="font-pbold"
+              />
+            )}
+
             {isSaved ? (
               <CustomButton
                 title={saving ? "Unsaving..." : "Remove from saved  videos"}
                 handlePress={handleUnsave}
-                containerStyles='mt-1'
-                textStyles='font-pbold'
+                containerStyles="mt-1"
+                textStyles="font-pbold"
                 isLoading={saving}
                 disabled={saving}
               />
@@ -217,8 +239,8 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete}) =
               <CustomButton
                 title={saving ? "Saving..." : "Save"}
                 handlePress={handleSave}
-                containerStyles='mt-1'
-                textStyles='font-pbold'
+                containerStyles="mt-1"
+                textStyles="font-pbold"
                 isLoading={saving}
                 disabled={saving}
               />
@@ -226,8 +248,8 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete}) =
             <CustomButton
               title="Cancel"
               handlePress={cancel}
-              containerStyles='mt-1'
-              textStyles='font-pbold'
+              containerStyles="mt-1"
+              textStyles="font-pbold"
             />
           </View>
         </View>
@@ -239,76 +261,76 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete}) =
 const styles = StyleSheet.create({
   container: {
     marginTop: 20,
-    padding: 10
+    padding: 10,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   avatarContainer: {
     width: 40,
     height: 40,
     borderRadius: 40,
-    overflow: 'hidden',
+    overflow: "hidden",
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
   },
   avatar: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   infoContainer: {
     flex: 1,
     marginLeft: 4,
   },
   title: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
   },
   username: {
-    color: 'white',
+    color: "white",
   },
   menuIcon: {
     width: 20,
     height: 20,
   },
   video: {
-    width: '100%',
+    width: "100%",
     height: 240,
     borderRadius: 10,
     marginTop: 10,
   },
   thumbnailContainer: {
-    width: '100%',
-    height: 240,
+    width: "100%",
+    height: "20%",
     borderRadius: 10,
     marginTop: 10,
-    position: 'relative',
-    justifyContent: 'center',
-    alignItems: 'center',
+    position: "relative",
+    justifyContent: "center",
+    alignItems: "center",
   },
   thumbnail: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
     borderRadius: 10,
   },
   playIcon: {
     width: 48,
     height: 48,
-    position: 'absolute',
+    position: "absolute",
   },
   modalContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
   },
   modalView: {
     width: 350,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 10,
     padding: 20,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -319,9 +341,9 @@ const styles = StyleSheet.create({
   },
   modalText: {
     marginBottom: 15,
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
 

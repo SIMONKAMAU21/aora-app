@@ -4,10 +4,10 @@ import {
   SafeAreaView,
   TouchableOpacity,
   View,
-  Text
+  Text,
 } from "react-native";
 import React from "react";
-import { getUserposts, signOut } from "../../lib/appwrite";
+import { getUserposts, signOut, userLikes } from "../../lib/appwrite";
 import Empty from "../../components/Empty";
 import useAppwrite from "../../lib/useAppwrite";
 import { icons } from "../../constants";
@@ -16,9 +16,10 @@ import { useGlobalContext } from "../../authContext";
 import Infobox from "../../components/Infobox";
 import { router } from "expo-router";
 
-const profile = () => {
-  const { user, isLogged, setUser, setIsLogged } = useGlobalContext();
+const Profile = () => {
+  const { user, setUser, setIsLogged } = useGlobalContext();
   const { data: posts } = useAppwrite(() => getUserposts(user.$id));
+  const { data: totalUniqueLikes } = useAppwrite(() => userLikes(user.accountid));
 
   const logOut = async () => {
     await signOut();
@@ -26,24 +27,18 @@ const profile = () => {
     setIsLogged(false);
     router.replace("/signIn");
   };
-  const title =()=>{
-    if(posts.length===0){
-      return '0'
-    }else{
-      return "3.1k"
-    }
-  }
+
   return (
     <SafeAreaView className="flex-1 justify-center bg-primary">
       <FlatList
         data={posts}
         keyExtractor={(item) => item.$id}
-        renderItem={({ item }) => <Videos Video={item} Delete={"Delete"}/>}
+        renderItem={({ item }) => <Videos Video={item} Delete={"Delete"} />}
         ListHeaderComponent={() => (
           <View style={{ marginTop: 20, padding: 20 }} className="w-full">
             <View>
               <Text className="text-secondary">
-               built with love and owned by @ simon kamau
+                built with love and owned by @ simon kamau
               </Text>
             </View>
             <TouchableOpacity onPress={logOut} className="items-end w-full">
@@ -75,15 +70,21 @@ const profile = () => {
                   subtitle="Posts"
                   containerStyles="mr-5"
                 />
-                <Infobox title={title()} subtitle="views" titleStyles="text-lg" />
+                <Infobox
+                  title={totalUniqueLikes || 0}
+                  subtitle="Likes"
+                  titleStyles="text-lg"
+                />
               </View>
             </View>
           </View>
         )}
         ListEmptyComponent={() => (
-          <Empty title="No videos found" subtitle="Create your first video"
-          onPress={()=>router.push('/create')}
-          buttonTitle={"create one"}
+          <Empty
+            title="No videos found"
+            subtitle="Create your first video"
+            onPress={() => router.push("/create")}
+            buttonTitle={"create one"}
           />
         )}
       />
@@ -91,4 +92,4 @@ const profile = () => {
   );
 };
 
-export default profile;
+export default Profile;

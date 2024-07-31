@@ -1,21 +1,21 @@
 import { Alert, FlatList, Image, RefreshControl, SafeAreaView, View } from "react-native";
-import { Text,  Badge } from "react-native-paper";
+import { Text,  Badge, Button } from "react-native-paper";
 import { images } from "../../constants";
 import Trendingvideos from "../../components/Trendingvideos";
 import Empty from "../../components/Empty";
 import { useEffect, useState } from "react";
-import { getLatestPosts, getPosts, getCurrentUser } from "../../lib/appwrite"; 
+import { getLatestPosts, getPosts, getCurrentUser, videoLikes } from "../../lib/appwrite"; 
 import useAppwrite from "../../lib/useAppwrite";
 import Videos from "../../components/Video";
 import Search from "../../components/Search";
 import { router } from "expo-router";
+import { useGlobalContext } from "../../authContext";
 
 export default function HomeScreen() {
   const { data: posts, refetch } = useAppwrite(getPosts);
   const { data: latestPosts } = useAppwrite(getLatestPosts);
   const [refreshing, setRefreshing] = useState(false);
   const [username, setUsername] = useState("User"); 
-
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
