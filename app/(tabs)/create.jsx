@@ -1,62 +1,44 @@
-import {
-  View,
-  Text,
-  SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  Alert,
-  ToastAndroid,
-} from "react-native";
-import React, { useState } from "react";
-import Inputs from "../../components/InputFields";
-import { ResizeMode, Video } from "expo-av";
-import icons from "../../constants/icons";
-import CustomButton from "../../components/CustomButton";
-import * as DocumentPicker from "expo-document-picker";
-import { router } from "expo-router";
-import { createVideo } from "../../lib/appwrite";
-import { useGlobalContext } from "../../authContext";
-import { FFmpegKit, FFmpegKitConfig } from 'ffmpeg-kit-react-native';
+import { useState } from 'react';
+import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, Image, Alert, ToastAndroid } from 'react-native';
+import { ResizeMode, Video } from 'expo-av';
+import * as DocumentPicker from 'expo-document-picker';
+import { router } from 'expo-router';
+import Inputs from '../../components/InputFields';
+import CustomButton from '../../components/CustomButton';
+import icons from '../../constants/icons';
+import { useGlobalContext } from '../../authContext';
+import { createVideo } from '../../lib/appwrite'; // Ensure this import is correct
+
+// const CLOUDINARY_UPLOAD_PRESET = 'wdfjbcug'; // Set your upload preset
+// const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/diyuy63ue/video/upload"; // Replace with your Cloudinary URL
 
 const Create = ({ onSuccess }) => {
   const { user } = useGlobalContext();
   const [isUploading, setIsUploading] = useState(false);
   const [form, setForm] = useState({
-    title: "",
+    title: '',
     thumbnail: null,
-    prompt: "",
+    prompt: '',
     video: null,
   });
 
   const openPicker = async (selectType) => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        type: selectType === "image" ? ["image/*"] : ["video/mp4", "video/gif"],
+        type: selectType === 'image' ? ['image/*'] : ['video/mp4', 'video/gif'],
       });
       if (!result.canceled) {
-        if (selectType === "image") {
+        if (selectType === 'image') {
           setForm({ ...form, thumbnail: result.assets[0] });
-        } else if (selectType === "video") {
+        } else if (selectType === 'video') {
           setForm({ ...form, video: result.assets[0] });
         }
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to open document picker");
-      console.error("Document Picker Error: ", error);
+      Alert.alert('Error', 'Failed to open document picker');
     }
   };
-
-  // const compressVideo = async (uri) => {
-  //   try {
-  //     const outputUri = uri.replace(/(.+)(\.\w+)$/, '$1_compressed$2');
-  //     await FFmpegKit.execute(`-i ${uri} -vcodec libx264 -acodec aac ${outputUri}`);
-  //     return outputUri;
-  //   } catch (error) {
-  //     console.error('Compression error', error);
-  //     return null;
-  //   }
-  // };
+  
 
   const submit = async () => {
     if (!form.prompt || !form.thumbnail || !form.title || !form.video) {
@@ -90,6 +72,48 @@ const Create = ({ onSuccess }) => {
       setIsUploading(false);
     }
   };
+  
+  // const uploadToCloudinary = async (fileUri, type) => {
+  //   if (!fileUri) {
+  //     // console.error('No file URI provided');
+  //     throw new Error('File URI is required');
+  //   }
+  
+  //   // Ensure the URI starts with 'file://'
+  //   const formattedFileUri = fileUri.startsWith('file://') ? fileUri : `file://${fileUri}`;
+  //   // console.log('Formatted File URI:', formattedFileUri);
+  
+  //   const data = new FormData();
+  //   data.append('file', {
+  //     uri: formattedFileUri,
+  //     type: type || 'application/octet-stream',
+  //     name: formattedFileUri.split('/').pop() || 'unknown',
+  //   });
+  //   data.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+  
+  //   try {
+  //     const response = await fetch(CLOUDINARY_URL, {
+  //       method: 'POST',
+  //       body: data,
+  //       headers: {
+  //         'Content-Type': 'multipart/form-data',
+  //       },
+  //     });
+  
+  //     if (!response.ok) {
+  //       const error = await response.text();
+  //       // console.error('Cloudinary Upload Error Response: ', error);
+  //       throw new Error('Failed to upload to Cloudinary');
+  //     }
+  
+  //     const result = await response.json();
+  //     return result.secure_url;
+  //   } catch (error) {
+  //     // console.error('Cloudinary Upload Error: ', error);
+  //     throw new Error('Failed to upload to Cloudinary');
+  //   }
+  // };
+  
 
   return (
     <SafeAreaView className="bg-primary h-full">
@@ -110,7 +134,7 @@ const Create = ({ onSuccess }) => {
           />
           <View className="mt-7 space-y-2">
             <Text className="text-base text-gray-100 font-pmedium">Upload Video</Text>
-            <TouchableOpacity onPress={() => openPicker("video")}>
+            <TouchableOpacity onPress={() => openPicker('video')}>
               {form.video ? (
                 <Video
                   source={{ uri: form.video.uri }}
@@ -132,7 +156,7 @@ const Create = ({ onSuccess }) => {
           </View>
           <View className="mt-7 space-y-6">
             <Text className="text-base text-gray-100 font-pmedium">Thumbnail Image</Text>
-            <TouchableOpacity onPress={() => openPicker("image")}>
+            <TouchableOpacity onPress={() => openPicker('image')}>
               {form.thumbnail ? (
                 <Image
                   source={{ uri: form.thumbnail.uri }}
@@ -159,7 +183,7 @@ const Create = ({ onSuccess }) => {
           containerStyles="mt-10 text-black"
           textStyles="text-black font-pbold"
           isLoading={isUploading}
-          title={isUploading ? "Uploading..." : "Create & Publish"}
+          title={isUploading ? 'Uploading...' : 'Create & Publish'}
           disabled={isUploading}
         />
       </ScrollView>

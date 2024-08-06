@@ -1,34 +1,17 @@
-import React, { useState, useRef, useEffect } from "react";
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  StyleSheet,
-  Modal,
-  ToastAndroid,
-  Alert,
-} from "react-native";
-import { Video } from "expo-av";
-import * as FileSystem from "expo-file-system";
-import { icons } from "../constants";
-import {
-  deleteVideo,
-  saveVideo,
-  fetchLikedVideos,
-  unsaveVideo,
-  getCurrentUser,
-  videoLikes,
-} from "../lib/appwrite";
-import CustomButton from "./CustomButton";
-import useAppwrite from "../lib/useAppwrite";
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Modal, ToastAndroid, Alert } from 'react-native';
+import { Video } from 'expo-av';
+import * as FileSystem from 'expo-file-system';
+import { icons } from '../constants';
+import { deleteVideo, saveVideo, fetchLikedVideos, unsaveVideo, getCurrentUser, videoLikes } from '../lib/appwrite';
+import CustomButton from './CustomButton';
+import { useVideo } from '../videoContext';
+import useAppwrite from '../lib/useAppwrite';
 
-const Videos = ({
-  Video: { $id, title, thumbnail, video, creator },
-  onDelete,
-}) => {
-  const avatar = creator?.avatar || "default-avatar-url";
-  const username = creator?.username || "Unknown";
+const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete }) => {
+  const { playVideo, addVideoRef } = useVideo();
+  const avatar = creator?.avatar || 'default-avatar-url';
+  const username = creator?.username || 'Unknown';
   const [play, setPlay] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const videoRef = useRef(null);
@@ -37,7 +20,7 @@ const Videos = ({
   const [localVideoUri, setLocalVideoUri] = useState(null);
   const [isSaved, setIsSaved] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
-const {data:likes} =useAppwrite(()=>videoLikes($id))
+  const { data: likes } = useAppwrite(() => videoLikes($id));
 
   useEffect(() => {
     const loadVideo = async () => {
@@ -58,8 +41,8 @@ const {data:likes} =useAppwrite(()=>videoLikes($id))
         const saved = likedVideos.documents.some((doc) => doc.$id === $id);
         setIsSaved(saved);
       } catch (error) {
-        Alert.alert("error", error.message);
-        console.error("Error checking if video is saved:", error);
+        Alert.alert('error', error.message);
+        console.error('Error checking if video is saved:', error);
       }
     };
 
@@ -68,13 +51,20 @@ const {data:likes} =useAppwrite(()=>videoLikes($id))
         const user = await getCurrentUser();
         setCurrentUserId(user.$id);
       } catch (error) {
-        console.error("Error fetching current user:", error);
+        console.error('Error fetching current user:', error);
       }
     };
+
     loadVideo();
     checkIfSaved();
     fetchCurrentUser();
   }, [$id, video]);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      addVideoRef($id, videoRef.current);
+    }
+  }, [videoRef]);
 
   const handlePlaybackStatusUpdate = (status) => {
     if (status.didJustFinish) {
@@ -83,9 +73,9 @@ const {data:likes} =useAppwrite(()=>videoLikes($id))
   };
 
   const handlePlayPress = () => {
+    playVideo($id);
     setPlay(true);
   };
-
   const handleMenuPress = () => {
     setModalVisible(true);
   };
@@ -98,11 +88,11 @@ const {data:likes} =useAppwrite(()=>videoLikes($id))
       if (onDelete) {
         onDelete();
       }
-      ToastAndroid.show("Video Deleted successfully", ToastAndroid.LONG);
+      ToastAndroid.show('Video Deleted successfully', ToastAndroid.LONG);
       setModalVisible(false);
       setDeleting(false);
     } catch (error) {
-      Alert.alert("Error", error);
+      Alert.alert('Error', error);
     } finally {
       setDeleting(false);
     }
@@ -117,10 +107,10 @@ const {data:likes} =useAppwrite(()=>videoLikes($id))
       setSaving(true);
       await saveVideo(videoId, uploaderId);
       setIsSaved(true);
-      ToastAndroid.show("Video saved Successfully", ToastAndroid.LONG);
+      ToastAndroid.show('Video saved Successfully', ToastAndroid.LONG);
       setModalVisible(false);
     } catch (error) {
-      Alert.alert("Error", error);
+      Alert.alert('Error', error);
       setSaving(false);
       setModalVisible(false);
     } finally {
@@ -134,10 +124,10 @@ const {data:likes} =useAppwrite(()=>videoLikes($id))
       setSaving(true);
       await unsaveVideo(videoId);
       setIsSaved(false);
-      ToastAndroid.show("Video unsaved Successfully", ToastAndroid.LONG);
+      ToastAndroid.show('Video unsaved Successfully', ToastAndroid.LONG);
       setModalVisible(false);
     } catch (error) {
-      Alert.alert("Error", error);
+      Alert.alert('Error', error);
       setSaving(false);
       setModalVisible(false);
     } finally {
@@ -146,33 +136,12 @@ const {data:likes} =useAppwrite(()=>videoLikes($id))
   };
 
   const cancel = () => {
-   setModalVisible(false)
+    setModalVisible(false);
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.avatarContainer}>
-          <Image
-            source={{ uri: avatar }}
-            style={styles.avatar}
-            resizeMode="cover"
-          />
-        </View>
-        <View style={styles.infoContainer}>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.username} numberOfLines={1}>
-            {username} ||
-          </Text>
-        </View>
-        <TouchableOpacity onPress={handleMenuPress}>
-          <Image
-            source={icons.menu}
-            style={styles.menuIcon}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
-      </View>
+     
       {play ? (
         <Video
           ref={videoRef}
@@ -180,32 +149,34 @@ const {data:likes} =useAppwrite(()=>videoLikes($id))
           style={styles.video}
           resizeMode="contain"
           useNativeControls
-          shouldPlay
+          shouldPlay={play}
           isLooping
           onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
-          onError={(error) => console.log("Video Error:", error)}
+          onError={(error) => console.log('Video Error:', error)}
         />
       ) : (
-        <TouchableOpacity
-          style={styles.thumbnailContainer}
-          onPress={handlePlayPress}
-        >
-          <Image
-            source={{ uri: thumbnail }}
-            style={styles.thumbnail}
-            resizeMode="cover"
-          />
-          <Image
-            source={icons.play}
-            style={styles.playIcon}
-            resizeMode="contain"
-          />
-          <View style={{display:"flex"}}>
-          <Text className="text-secondary position-absolute">@user {creator?.accountid} </Text>
-          <Text className="text-secondary text-pbold">{`likes: ${likes}`}</Text>
+        <TouchableOpacity style={styles.thumbnailContainer} onPress={handlePlayPress}>
+          <Image source={{ uri: thumbnail }} style={styles.thumbnail} resizeMode="cover" />
+          <Image source={icons.play} style={styles.playIcon} resizeMode="contain" />
+          <View style={styles.infoOverlay}>
+            <Text style={styles.userId}>@user {creator?.accountid}</Text>
           </View>
         </TouchableOpacity>
       )}
+       <View style={styles.header} className="mt-5">
+        <View style={styles.avatarContainer}>
+          <Image source={{ uri: avatar }} style={styles.avatar} resizeMode="cover" />
+        </View>
+        <View style={styles.infoContainer}>
+          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.username} numberOfLines={1}>
+            {username} || {`likes: ${likes}`}
+          </Text>
+        </View>
+        <TouchableOpacity onPress={handleMenuPress}>
+          <Image source={icons.menu} style={styles.menuIcon} resizeMode="contain" />
+        </TouchableOpacity>
+      </View>
       <Modal
         animationType="slide"
         transparent={true}
@@ -215,9 +186,9 @@ const {data:likes} =useAppwrite(()=>videoLikes($id))
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>Options</Text>
-            {currentUserId === creator.$id && (
+            {currentUserId === creator?.$id && (
               <CustomButton
-                title={deleting ? "Deleting..." : "Delete"}
+                title={deleting ? 'Deleting...' : 'Delete'}
                 handlePress={handleDelete}
                 containerStyles="mt-1"
                 isLoading={deleting}
@@ -225,10 +196,9 @@ const {data:likes} =useAppwrite(()=>videoLikes($id))
                 textStyles="font-pbold"
               />
             )}
-
             {isSaved ? (
               <CustomButton
-                title={saving ? "Unsaving..." : "Remove from saved  videos"}
+                title={saving ? 'Unsaving...' : 'Remove from saved videos'}
                 handlePress={handleUnsave}
                 containerStyles="mt-1"
                 textStyles="font-pbold"
@@ -237,7 +207,7 @@ const {data:likes} =useAppwrite(()=>videoLikes($id))
               />
             ) : (
               <CustomButton
-                title={saving ? "Saving..." : "Save"}
+                title={saving ? 'Saving...' : 'Save'}
                 handlePress={handleSave}
                 containerStyles="mt-1"
                 textStyles="font-pbold"
@@ -296,13 +266,13 @@ const styles = StyleSheet.create({
   },
   video: {
     width: "100%",
-    height: 240,
+    height: 250,
     borderRadius: 10,
     marginTop: 10,
   },
   thumbnailContainer: {
     width: "100%",
-    height: "20%",
+    height: 240,
     borderRadius: 10,
     marginTop: 10,
     position: "relative",
@@ -344,6 +314,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  infoOverlay: {
+    position: "absolute",
+    bottom: 10,
+    left: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.5)",
+    padding: 5,
+    borderRadius: 5,
   },
 });
 
