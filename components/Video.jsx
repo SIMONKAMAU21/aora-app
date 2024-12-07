@@ -177,7 +177,7 @@ console.log('isPlayig', isPlaying)
         <View onPress={goProfile} style={styles.infoContainer}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.username} numberOfLines={1}>
-            {username} || {`likes: ${likes}`}
+            {username} || {`👍: ${likes}`}   {` 👎: ${"0"}`}
           </Text>
         </View>
         <TouchableOpacity onPress={handleMenuPress}>
