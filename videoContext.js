@@ -18,7 +18,7 @@ export const VideoProvider = ({ children }) => {
   };
 
   return (
-    <VideoContext.Provider value={{ playVideo, addVideoRef }}>
+    <VideoContext.Provider value={{ playVideo, addVideoRef,playingVideoId }}>
       {children}
     </VideoContext.Provider>
   );

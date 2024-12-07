@@ -6,7 +6,7 @@ import { icons } from "../constants";
 
 const zoomIn = {
   0: {
-    scale: 0.9,
+    scale: 0.7,
   },
   1: {
     scale: 1,
@@ -15,21 +15,22 @@ const zoomIn = {
 
 const zoomOut = {
   0: {
-    scale: 1,
+    scale: 0.5,
   },
   1: {
-    scale: 0.8,
+    scale: 0.5,
   },
 };
 
-const TrendingItem = ({ activeItem, item, setPlaying, playing }) => {
+const TrendingItem = ({ activeItem, item,playingItem, setPlaying }) => {
+  const isPlaying = playingItem === item.$id
   return (
     <Animatable.View
       style={[styles.trendingItem, activeItem === item.$id && styles.activeItem]}
       animation={activeItem === item.$id ? zoomIn : zoomOut}
       duration={500}
     >
-      {playing ? (
+      {isPlaying ? (
         <Video
           style={styles.video}
           resizeMode="contain"
@@ -40,7 +41,7 @@ const TrendingItem = ({ activeItem, item, setPlaying, playing }) => {
       ) : (
         <TouchableOpacity
           style={styles.thumbnailContainer}
-          onPress={() => setPlaying(true)}
+          onPress={() => setPlaying(item.$id)}
         >
           <ImageBackground
             source={{ uri: item.thumbnail }}
@@ -61,7 +62,7 @@ const TrendingItem = ({ activeItem, item, setPlaying, playing }) => {
 
 export default function TrendingVideos({ posts }) {
   const [activeItem, setActiveItem] = useState(posts?.length > 0 ? posts[0].$id : null);
-  const [playing, setPlaying] = useState(false);
+  const [playing, setPlaying] = useState(null);
 
   const viewableChanges = ({ viewableItems }) => {
     if (viewableItems.length > 0) {
@@ -77,8 +78,8 @@ export default function TrendingVideos({ posts }) {
         <TrendingItem
           activeItem={activeItem}
           item={item}
+          playingItem={playing}
           setPlaying={setPlaying}
-          playing={playing}
         />
       )}
       onViewableItemsChanged={viewableChanges}
@@ -93,16 +94,18 @@ export default function TrendingVideos({ posts }) {
 
 const styles = StyleSheet.create({
   trendingItem: {
-    marginRight: 3,
+    marginRight: 1,
   },
   activeItem: {
-  
+    borderColor: "blue",
+
   },
   video: {
     width: 350,
     height: 200,
     borderRadius: 10,
-    marginTop: 10,
+    borderColor: "teal",
+    marginTop: 20,
   },
   thumbnailContainer: {
     width: 350,
@@ -113,7 +116,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     overflow: "hidden",
     borderWidth: 2,
-    // borderColor: "red",
+    borderColor: "teal",
     padding:"auto"
   },
   thumbnail: {
@@ -129,6 +132,6 @@ const styles = StyleSheet.create({
     transform: [{ translateX: -25 }, { translateY: -25 }],
   },
   flatListContainer: {
-    paddingLeft: 170,
+    // paddingLeft: 170,
   },
 });

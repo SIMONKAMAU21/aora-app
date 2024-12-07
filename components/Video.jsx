@@ -9,10 +9,10 @@ import { useVideo } from '../videoContext';
 import useAppwrite from '../lib/useAppwrite';
 
 const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete }) => {
-  const { playVideo, addVideoRef } = useVideo();
+  const { playVideo, addVideoRef,playingVideoId } = useVideo();
   const avatar = creator?.avatar || 'default-avatar-url';
   const username = creator?.username || 'Unknown';
-  const [play, setPlay] = useState(false);
+  // const [play, setPlay] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const videoRef = useRef(null);
   const [deleting, setDeleting] = useState(false);
@@ -21,6 +21,8 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete }) 
   const [isSaved, setIsSaved] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
   const { data: likes } = useAppwrite(() => videoLikes($id));
+const isPlaying = playingVideoId === $id
+console.log('isPlayig', isPlaying)
 
   useEffect(() => {
     const loadVideo = async () => {
@@ -38,7 +40,7 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete }) 
     const checkIfSaved = async () => {
       try {
         const likedVideos = await fetchLikedVideos();
-        const saved = likedVideos.documents.some((doc) => doc.$id === $id);
+        const saved = likedVideos?.documents?.some((doc) => doc?.$id === $id);
         setIsSaved(saved);
       } catch (error) {
         Alert.alert('error', error.message);
@@ -68,13 +70,13 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete }) 
 
   const handlePlaybackStatusUpdate = (status) => {
     if (status.didJustFinish) {
-      setPlay(false);
+      playVideo(null);
     }
   };
 
   const handlePlayPress = () => {
     playVideo($id);
-    setPlay(true);
+    // setPlay(true);
   };
   const handleMenuPress = () => {
     setModalVisible(true);
@@ -142,14 +144,14 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete }) 
   return (
     <View style={styles.container}>
      
-      {play ? (
+      {isPlaying ? (
         <Video
           ref={videoRef}
           source={{ uri: localVideoUri || video }}
           style={styles.video}
           resizeMode="contain"
           useNativeControls
-          shouldPlay={play}
+          shouldPlay={isPlaying}
           isLooping
           onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
           onError={(error) => console.log('Video Error:', error)}

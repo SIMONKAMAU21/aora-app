@@ -5,6 +5,7 @@ import { useFonts } from "expo-font";
 import { useEffect } from "react";
 import GlobalProvider from "../authContext";
 import { VideoProvider } from "../videoContext";
+import { screenOptions } from "../constants/animation";
 
 SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
@@ -30,9 +31,9 @@ export default function RootLayout() {
       <VideoProvider>
         <PaperProvider>
           <Stack>
-            <Stack.Screen name="index" options={{ headerShown: false }} />
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="index" options={screenOptions} />
+            <Stack.Screen name="(auth)" options={screenOptions} />
+            <Stack.Screen name="(tabs)" options={screenOptions} />
             <Stack.Screen
               name="Search/[query]"
               options={{ headerShown: false }}

@@ -9,8 +9,6 @@ import icons from '../../constants/icons';
 import { useGlobalContext } from '../../authContext';
 import { createVideo } from '../../lib/appwrite'; // Ensure this import is correct
 
-// const CLOUDINARY_UPLOAD_PRESET = 'wdfjbcug'; // Set your upload preset
-// const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/diyuy63ue/video/upload"; // Replace with your Cloudinary URL
 
 const Create = ({ onSuccess }) => {
   const { user } = useGlobalContext();
@@ -35,6 +33,7 @@ const Create = ({ onSuccess }) => {
         }
       }
     } catch (error) {
+      
       Alert.alert('Error', 'Failed to open document picker');
     }
   };
@@ -47,13 +46,9 @@ const Create = ({ onSuccess }) => {
     }
     setIsUploading(true);
     try {
-      // const compressedVideoUri = await compressVideo(form.video.uri);
-      // if (!compressedVideoUri) {
-      //   throw new Error("Video compression failed");
-      // }
+  
       await createVideo({
         ...form,
-        // video: { ...form.video, uri: compressedVideoUri },
         userId: user.$id,
       });
       ToastAndroid.show("Uploaded Successfully", ToastAndroid.LONG);
@@ -73,47 +68,7 @@ const Create = ({ onSuccess }) => {
     }
   };
   
-  // const uploadToCloudinary = async (fileUri, type) => {
-  //   if (!fileUri) {
-  //     // console.error('No file URI provided');
-  //     throw new Error('File URI is required');
-  //   }
-  
-  //   // Ensure the URI starts with 'file://'
-  //   const formattedFileUri = fileUri.startsWith('file://') ? fileUri : `file://${fileUri}`;
-  //   // console.log('Formatted File URI:', formattedFileUri);
-  
-  //   const data = new FormData();
-  //   data.append('file', {
-  //     uri: formattedFileUri,
-  //     type: type || 'application/octet-stream',
-  //     name: formattedFileUri.split('/').pop() || 'unknown',
-  //   });
-  //   data.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-  
-  //   try {
-  //     const response = await fetch(CLOUDINARY_URL, {
-  //       method: 'POST',
-  //       body: data,
-  //       headers: {
-  //         'Content-Type': 'multipart/form-data',
-  //       },
-  //     });
-  
-  //     if (!response.ok) {
-  //       const error = await response.text();
-  //       // console.error('Cloudinary Upload Error Response: ', error);
-  //       throw new Error('Failed to upload to Cloudinary');
-  //     }
-  
-  //     const result = await response.json();
-  //     return result.secure_url;
-  //   } catch (error) {
-  //     // console.error('Cloudinary Upload Error: ', error);
-  //     throw new Error('Failed to upload to Cloudinary');
-  //   }
-  // };
-  
+
 
   return (
     <SafeAreaView className="bg-primary h-full">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   FlatList,
   Image,
@@ -8,96 +8,84 @@ import {
   Text,
   Alert,
   ToastAndroid,
-} from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import { getUserposts, signOut, userLikes, uploadProfileImage, updateUserProfile } from '../../lib/appwrite';
-import Empty from '../../components/Empty';
-import useAppwrite from '../../lib/useAppwrite';
-import { icons } from '../../constants';
-import Videos from '../../components/Video';
-import { useGlobalContext } from '../../authContext';
-import Infobox from '../../components/Infobox';
-import { router } from 'expo-router';
+} from "react-native";
+import * as DocumentPicker from "expo-document-picker";
+import {
+  getUserposts,
+  signOut,
+  userLikes,
+  uploadProfileImage,
+  updateUserProfile,
+  uploadToCloudinary,
+} from "../../lib/appwrite";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import Empty from "../../components/Empty";
+import useAppwrite from "../../lib/useAppwrite";
+import { icons } from "../../constants";
+import Videos from "../../components/Video";
+import { useGlobalContext } from "../../authContext";
+import Infobox from "../../components/Infobox";
+import { router } from "expo-router";
+import { Icon } from "react-native-paper";
 
 const Profile = () => {
   const { user, setUser, setIsLogged } = useGlobalContext();
   const { data: posts } = useAppwrite(() => getUserposts(user.$id));
-  const { data: totalUniqueLikes } = useAppwrite(() => userLikes(user.accountid));
+  const { data: totalUniqueLikes } = useAppwrite(() =>
+    userLikes(user.accountid)
+  );
 
-  const [image, setImage] = useState(null); // State for storing the picked image
+  const [image, setImage] = useState({
+    thumbnail: null,
+  }); 
 
   const logOut = async () => {
     await signOut();
     setUser(null);
     setIsLogged(false);
-    router.replace('/signIn');
+    router.replace("/signIn");
   };
 
-  // const pickImage = async () => {
-  //   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
-  //   if (status !== 'granted') {
-  //     Alert.alert('Permission required', 'Sorry, we need camera roll permissions to make this work!');
-  //     return null;
-  //   }
-  
-  //   const result = await ImagePicker.launchImageLibraryAsync({
-  //     mediaTypes: ImagePicker.MediaTypeOptions.Images,
-  //     allowsEditing: true,
-  //     aspect: [4, 3],
-  //     quality: 1,
-  //   });
-  
-  //   console.log('ImagePicker result:', result); // Log the result for debugging
-  
-  //   if (!result.canceled && result.assets.length > 0) {
-  //     return result.assets[0]; // Return the first asset
-  //   }
-  
-  //   return null;
-  // };
-  
 
-  // const handleChangeProfileImage = async () => {
-  //   try {
-  //     // Pick an image
-  //     const result = await pickImage();
-  //     console.log('Selected Image Result:', result);
-    
-  //     if (result) {
-  //       // Prepare the file details
-  //       const fileDetails = {
-  //         mimeType: result.type || 'image/jpeg',
-  //         uri: result.uri.startsWith('file://') ? result.uri : `file://${result.uri}`,
-  //       };
-    
-  //       // Upload the profile image and get the URL
-  //       const imageUrl = await uploadProfileImage(fileDetails);
-  //       console.log('Uploaded Image URL:', imageUrl);
-    
-  //       // Update user profile and get the response
-  //       const updateResponse = await updateUserProfile(user.$id, imageUrl);
-  //       console.log('Profile Update Response:', updateResponse);
-    
-  //       // Update the user state
-  //       setUser((prev) => ({ ...prev, avatar: imageUrl }));
-  
-  //       // Show success alert
-  //       Alert.alert('Success', updateResponse.message);
-  //     } else {
-  //       Alert.alert('Error', 'No image selected');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error:', error);
-  //     Alert.alert('Error', 'Failed to update profile image');
-  //   }
-  // };
-  
-  const comingSoon = () =>{
-    ToastAndroid.show("Feature is coming soon",ToastAndroid.LONG)
-  }
-  
-  
+
+  const openPicker = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ["image/*"],
+      });
+      console.log("Document Picker Result:", result);
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setImage(result.assets[0].uri); // Set the URI from the first asset
+      } else {
+        Alert.alert(
+          "Error",
+          "No image was picked or the operation was canceled"
+        );
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      Alert.alert("Error", "Failed to open document picker");
+    }
+  };
+
+  const onSubmit = async () => {
+    try {
+      // Ensure that `image` is set to the URI of the picked image
+      if (!image) {
+        Alert.alert("Error", "Please select an image first");
+        return;
+      }
+
+      // Call the update function with the correct arguments
+      const avatarUrl = await uploadToCloudinary(image, "image");
+      await updateUserProfile(user.$id, avatarUrl);
+
+      ToastAndroid.show("Uploaded Successfully", ToastAndroid.LONG);
+    } catch (error) {
+      console.warn("Error:", error);
+      Alert.alert("Error", "Failed to update profile image");
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 justify-center bg-primary">
@@ -122,23 +110,67 @@ const Profile = () => {
             </TouchableOpacity>
 
             <View className="items-center justify-center">
-              <TouchableOpacity >
-                <View className="w-[50] h-[50] item-center justify-center border border-secondary rounded-lg">
+              <TouchableOpacity onPress={openPicker}>
+                <View
+                  style={{
+                    width: 100,
+                    height: 100,
+                    borderRadius: 50, // Half of the width and height for a circular shape
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderWidth: 1,
+                    borderColor: "#ccc", // Optional: Add a border color
+                    overflow: "hidden", // Ensures child elements stay within the rounded border
+                  }}
+                >
+                  {/* Profile Image */}
                   <Image
                     source={{ uri: user?.avatar }}
-                    className="w-full h-full rounded-lg"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: 50, // Ensure the image itself is rounded
+                    }}
                     resizeMode="cover"
                   />
+
+                  {/* Icon Overlay */}
+                  <View
+                    style={{
+                      width: "100%",
+                      position: "absolute",
+                      bottom: 0,
+                      alignItems: "center",
+                      paddingVertical: 8, // Add some padding for spacing around the icon
+                      backgroundColor: "rgba(0, 0, 0, 0.8)", // Slight transparency for the overlay
+                      borderBottomLeftRadius: 50,
+                      borderBottomRightRadius: 50, // Rounded corners at the bottom
+                    }}
+                  >
+                    <Ionicons
+                      name="camera-outline"
+                      size={24}
+                      color="#FF9C01" // Icon color
+                    />
+                  </View>
                 </View>
-                <Text className="mt-2 text-secondary">Change Profile Image</Text>
+
+                {/* <Text style={{position:"absolute"}} className="mt-2 text-secondary">
+                  Change Profile Image
+                </Text> */}
               </TouchableOpacity>
 
-              <TouchableOpacity className="mt-4 bg-secondary p-2 rounded" onPress={comingSoon}>
-                <Text className="text-white font-bold text-center">Update Profile Image</Text>
+              <TouchableOpacity
+                className="mt-4 bg-secondary p-2 rounded"
+                onPress={onSubmit}
+              >
+                <Text className="text-white font-bold text-center">
+                  Update Profile Image
+                </Text>
               </TouchableOpacity>
 
               <Infobox
-                title={user?.username || 'Anonymous'}
+                title={user?.username || "Anonymous"}
                 titleStyles="text-lg"
                 containerStyles="mt-5"
               />
@@ -162,7 +194,7 @@ const Profile = () => {
           <Empty
             title="No videos found"
             subtitle="Create your first video"
-            onPress={() => router.push('/create')}
+            onPress={() => router.push("/create")}
             buttonTitle={"create one"}
           />
         )}
