@@ -18,7 +18,7 @@ const zoomOut = {
     scale: 0.5,
   },
   1: {
-    scale: 0.5,
+    scale: 0.8,
   },
 };
 
@@ -28,7 +28,7 @@ const TrendingItem = ({ activeItem, item,playingItem, setPlaying }) => {
     <Animatable.View
       style={[styles.trendingItem, activeItem === item.$id && styles.activeItem]}
       animation={activeItem === item.$id ? zoomIn : zoomOut}
-      duration={500}
+      duration={800}
     >
       {isPlaying ? (
         <Video

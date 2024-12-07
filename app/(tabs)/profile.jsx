@@ -14,7 +14,6 @@ import {
   getUserposts,
   signOut,
   userLikes,
-  uploadProfileImage,
   updateUserProfile,
   uploadToCloudinary,
 } from "../../lib/appwrite";
@@ -26,7 +25,6 @@ import Videos from "../../components/Video";
 import { useGlobalContext } from "../../authContext";
 import Infobox from "../../components/Infobox";
 import { router } from "expo-router";
-import { Icon } from "react-native-paper";
 
 const Profile = () => {
   const { user, setUser, setIsLogged } = useGlobalContext();
@@ -35,9 +33,8 @@ const Profile = () => {
     userLikes(user.accountid)
   );
 
-  const [image, setImage] = useState({
-    thumbnail: null,
-  }); 
+  const [image, setImage] = useState(null); // Holds selected image URI for preview
+  const [uploadedImage, setUploadedImage] = useState(user?.avatar); // Holds the uploaded image URI
 
   const logOut = async () => {
     await signOut();
@@ -45,8 +42,6 @@ const Profile = () => {
     setIsLogged(false);
     router.replace("/signIn");
   };
-
-
 
   const openPicker = async () => {
     try {
@@ -79,7 +74,7 @@ const Profile = () => {
       // Call the update function with the correct arguments
       const avatarUrl = await uploadToCloudinary(image, "image");
       await updateUserProfile(user.$id, avatarUrl);
-
+      setUploadedImage(avatarUrl);
       ToastAndroid.show("Uploaded Successfully", ToastAndroid.LONG);
     } catch (error) {
       console.warn("Error:", error);
@@ -124,15 +119,27 @@ const Profile = () => {
                   }}
                 >
                   {/* Profile Image */}
-                  <Image
-                    source={{ uri: user?.avatar }}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      borderRadius: 50, // Ensure the image itself is rounded
-                    }}
-                    resizeMode="cover"
-                  />
+                  {image ? (
+                    <Image
+                      source={{ uri: image }}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        borderRadius: 50, // Ensure the image itself is rounded
+                      }}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <Image
+                      source={{ uri: uploadedImage }}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        borderRadius: 50, // Ensure the image itself is rounded
+                      }}
+                      resizeMode="cover"
+                    />
+                  )}
 
                   {/* Icon Overlay */}
                   <View

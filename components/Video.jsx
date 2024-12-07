@@ -7,6 +7,7 @@ import { deleteVideo, saveVideo, fetchLikedVideos, unsaveVideo, getCurrentUser, 
 import CustomButton from './CustomButton';
 import { useVideo } from '../videoContext';
 import useAppwrite from '../lib/useAppwrite';
+import { router } from 'expo-router';
 
 const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete }) => {
   const { playVideo, addVideoRef,playingVideoId } = useVideo();
@@ -141,6 +142,10 @@ console.log('isPlayig', isPlaying)
     setModalVisible(false);
   };
 
+  const goProfile = () =>{
+    router.push("/Profile")
+    console.log('clicked')
+  }
   return (
     <View style={styles.container}>
      
@@ -169,7 +174,7 @@ console.log('isPlayig', isPlaying)
         <View style={styles.avatarContainer}>
           <Image source={{ uri: avatar }} style={styles.avatar} resizeMode="cover" />
         </View>
-        <View style={styles.infoContainer}>
+        <View onPress={goProfile} style={styles.infoContainer}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.username} numberOfLines={1}>
             {username} || {`likes: ${likes}`}

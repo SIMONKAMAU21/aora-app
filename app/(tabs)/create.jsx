@@ -92,7 +92,7 @@ const Create = ({ onSuccess }) => {
             <TouchableOpacity onPress={() => openPicker('video')}>
               {form.video ? (
                 <Video
-                  source={{ uri: form.video.uri }}
+                  source={{ uri: form.video.uri}}
                   className="w-full h-64 rounded-xl bg-gray-100"
                   resizeMode={ResizeMode.CONTAIN}
                 />
