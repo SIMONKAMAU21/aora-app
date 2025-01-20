@@ -13,13 +13,14 @@
       "backgroundColor": "#000000"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.simon.aora"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/logo-small.png",
         "backgroundColor": "#ffffff",
-        "resizeMode":"contain"
+        "resizeMode": "contain"
       },
       "package": "com.simon.aora"
     },

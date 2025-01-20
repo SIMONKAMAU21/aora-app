@@ -1,20 +1,40 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Modal, ToastAndroid, Alert } from 'react-native';
-import { Video } from 'expo-av';
-import * as FileSystem from 'expo-file-system';
-import { icons } from '../constants';
-import { deleteVideo, saveVideo, fetchLikedVideos, unsaveVideo, getCurrentUser, videoLikes } from '../lib/appwrite';
-import CustomButton from './CustomButton';
-import { useVideo } from '../videoContext';
-import useAppwrite from '../lib/useAppwrite';
-import { router } from 'expo-router';
+import React, { useState, useRef, useEffect } from "react";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  Modal,
+  ToastAndroid,
+  Alert,
+} from "react-native";
+import { Video } from "expo-av";
+import * as FileSystem from "expo-file-system";
+import { icons } from "../constants";
+import {
+  deleteVideo,
+  saveVideo,
+  fetchLikedVideos,
+  unsaveVideo,
+  getCurrentUser,
+  videoLikes,
+} from "../lib/appwrite";
+import CustomButton from "./CustomButton";
+import { useVideo } from "../videoContext";
+import useAppwrite from "../lib/useAppwrite";
+import { router } from "expo-router";
+import { Divider, Menu } from "react-native-paper";
 
-const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete }) => {
-  const { playVideo, addVideoRef,playingVideoId } = useVideo();
-  const avatar = creator?.avatar || 'default-avatar-url';
-  const username = creator?.username || 'Unknown';
+const Videos = ({
+  Video: { $id, title, thumbnail, video, creator },
+  onDelete,
+}) => {
+  const { playVideo, addVideoRef, playingVideoId } = useVideo();
+  const avatar = creator?.avatar || "default-avatar-url";
+  const username = creator?.username || "Unknown";
   // const [play, setPlay] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [menuVisible, setMenuVisible] = useState(false); // Menu state
   const videoRef = useRef(null);
   const [deleting, setDeleting] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -22,8 +42,7 @@ const Videos = ({ Video: { $id, title, thumbnail, video, creator }, onDelete }) 
   const [isSaved, setIsSaved] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
   const { data: likes } = useAppwrite(() => videoLikes($id));
-const isPlaying = playingVideoId === $id
-console.log('isPlayig', isPlaying)
+  const isPlaying = playingVideoId === $id;
 
   useEffect(() => {
     const loadVideo = async () => {
@@ -44,8 +63,8 @@ console.log('isPlayig', isPlaying)
         const saved = likedVideos?.documents?.some((doc) => doc?.$id === $id);
         setIsSaved(saved);
       } catch (error) {
-        Alert.alert('error', error.message);
-        console.error('Error checking if video is saved:', error);
+        Alert.alert("error", error.message);
+        console.error("Error checking if video is saved:", error);
       }
     };
 
@@ -54,7 +73,7 @@ console.log('isPlayig', isPlaying)
         const user = await getCurrentUser();
         setCurrentUserId(user.$id);
       } catch (error) {
-        console.error('Error fetching current user:', error);
+        console.error("Error fetching current user:", error);
       }
     };
 
@@ -79,9 +98,7 @@ console.log('isPlayig', isPlaying)
     playVideo($id);
     // setPlay(true);
   };
-  const handleMenuPress = () => {
-    setModalVisible(true);
-  };
+
 
   const handleDelete = async () => {
     const videoDocumentId = $id;
@@ -91,11 +108,11 @@ console.log('isPlayig', isPlaying)
       if (onDelete) {
         onDelete();
       }
-      ToastAndroid.show('Video Deleted successfully', ToastAndroid.LONG);
-      setModalVisible(false);
+      ToastAndroid.show("Video Deleted successfully", ToastAndroid.LONG);
+      setMenuVisible(false);
       setDeleting(false);
     } catch (error) {
-      Alert.alert('Error', error);
+      Alert.alert("Error", error);
     } finally {
       setDeleting(false);
     }
@@ -110,12 +127,12 @@ console.log('isPlayig', isPlaying)
       setSaving(true);
       await saveVideo(videoId, uploaderId);
       setIsSaved(true);
-      ToastAndroid.show('Video saved Successfully', ToastAndroid.LONG);
-      setModalVisible(false);
+      ToastAndroid.show("Video saved Successfully", ToastAndroid.LONG);
+      setMenuVisible(false);
     } catch (error) {
-      Alert.alert('Error', error);
+      Alert.alert("Error", error);
       setSaving(false);
-      setModalVisible(false);
+      setMenuVisible(false);
     } finally {
       setSaving(false);
     }
@@ -127,28 +144,26 @@ console.log('isPlayig', isPlaying)
       setSaving(true);
       await unsaveVideo(videoId);
       setIsSaved(false);
-      ToastAndroid.show('Video unsaved Successfully', ToastAndroid.LONG);
-      setModalVisible(false);
+      ToastAndroid.show("Video unsaved Successfully", ToastAndroid.LONG);
+      setMenuVisible(false);
     } catch (error) {
-      Alert.alert('Error', error);
+      Alert.alert("Error", error);
       setSaving(false);
-      setModalVisible(false);
+      setMenuVisible(false);
     } finally {
       setSaving(false);
     }
   };
 
   const cancel = () => {
-    setModalVisible(false);
+    setMenuVisible(false);
   };
 
-  const goProfile = () =>{
-    router.push("/Profile")
-    console.log('clicked')
-  }
+  const goProfile = () => {
+    router.push("/Profile");
+  };
   return (
     <View style={styles.container}>
-     
       {isPlaying ? (
         <Video
           ref={videoRef}
@@ -159,78 +174,70 @@ console.log('isPlayig', isPlaying)
           shouldPlay={isPlaying}
           isLooping
           onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
-          onError={(error) => console.log('Video Error:', error)}
+          onError={(error) => console.log("Video Error:", error)}
         />
       ) : (
-        <TouchableOpacity style={styles.thumbnailContainer} onPress={handlePlayPress}>
-          <Image source={{ uri: thumbnail }} style={styles.thumbnail} resizeMode="cover" />
-          <Image source={icons.play} style={styles.playIcon} resizeMode="contain" />
+        <TouchableOpacity
+          style={styles.thumbnailContainer}
+          onPress={handlePlayPress}
+        >
+          <Image
+            source={{ uri: thumbnail }}
+            style={styles.thumbnail}
+            resizeMode="cover"
+          />
+          <Image
+            source={icons.play}
+            style={styles.playIcon}
+            resizeMode="contain"
+          />
           <View style={styles.infoOverlay}>
             <Text style={styles.userId}>@user {creator?.accountid}</Text>
           </View>
         </TouchableOpacity>
       )}
-       <View style={styles.header} className="mt-5">
+      <View style={styles.header} className="mt-5">
         <View style={styles.avatarContainer}>
-          <Image source={{ uri: avatar }} style={styles.avatar} resizeMode="cover" />
+          <Image
+            source={{ uri: avatar }}
+            style={styles.avatar}
+            resizeMode="cover"
+          />
         </View>
         <View onPress={goProfile} style={styles.infoContainer}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.username} numberOfLines={1}>
-            {username} || {`👍: ${likes}`}   {` 👎: ${"0"}`}
+            {username} || {`👍: ${likes}`} {` 👎: ${"0"}`}
           </Text>
         </View>
-        <TouchableOpacity onPress={handleMenuPress}>
-          <Image source={icons.menu} style={styles.menuIcon} resizeMode="contain" />
-        </TouchableOpacity>
-      </View>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>Options</Text>
-            {currentUserId === creator?.$id && (
-              <CustomButton
-                title={deleting ? 'Deleting...' : 'Delete'}
-                handlePress={handleDelete}
-                containerStyles="mt-1"
-                isLoading={deleting}
-                disabled={deleting}
-                textStyles="font-pbold"
-              />
-            )}
-            {isSaved ? (
-              <CustomButton
-                title={saving ? 'Unsaving...' : 'Remove from saved videos'}
-                handlePress={handleUnsave}
-                containerStyles="mt-1"
-                textStyles="font-pbold"
-                isLoading={saving}
-                disabled={saving}
-              />
-            ) : (
-              <CustomButton
-                title={saving ? 'Saving...' : 'Save'}
-                handlePress={handleSave}
-                containerStyles="mt-1"
-                textStyles="font-pbold"
-                isLoading={saving}
-                disabled={saving}
-              />
-            )}
-            <CustomButton
-              title="Cancel"
-              handlePress={cancel}
-              containerStyles="mt-1"
-              textStyles="font-pbold"
+      
+
+      <Menu
+          visible={menuVisible}
+          onDismiss={() => setMenuVisible(false)}
+          anchor={
+            <TouchableOpacity onPress={() => setMenuVisible(true)}>
+              <Image source={icons.menu} style={styles.menuIcon} resizeMode="contain" />
+            </TouchableOpacity>
+          }
+        >
+          {currentUserId === creator?.$id && (
+            <Menu.Item
+            leadingIcon={"delete"}
+              onPress={handleDelete}
+              title={deleting ? "Deleting..." : "Delete"}
             />
-          </View>
+          )}
+          <Menu.Item
+          leadingIcon="heart"
+            onPress={isSaved ? handleUnsave : handleSave}
+            title={saving ? "Processing..." : isSaved ? "Unsave" : "Save"}
+          />
+          <Divider/>
+          <Menu.Item  onPress={() => setMenuVisible(false)} title="Cancel" />
+        </Menu>
         </View>
-      </Modal>
+
     </View>
   );
 };
@@ -239,6 +246,9 @@ const styles = StyleSheet.create({
   container: {
     marginTop: 20,
     padding: 10,
+    // borderBottomWidth:1,
+    // borderColor:"#ff9d00",
+    borderRadius: 10,
   },
   header: {
     flexDirection: "row",
@@ -250,7 +260,8 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor:"green",
+    // borderColor: "#ccc",
   },
   avatar: {
     width: "100%",
@@ -265,7 +276,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   username: {
-    color: "white",
+    color: "gray",
   },
   menuIcon: {
     width: 20,
@@ -276,12 +287,17 @@ const styles = StyleSheet.create({
     height: 250,
     borderRadius: 10,
     marginTop: 10,
+    borderBottomWidth:1,
+    borderColor:"green",
+    
   },
   thumbnailContainer: {
     width: "100%",
     height: 240,
     borderRadius: 10,
     marginTop: 10,
+    borderBottomWidth:1,
+    borderColor:"#ff9d00",
     position: "relative",
     justifyContent: "center",
     alignItems: "center",

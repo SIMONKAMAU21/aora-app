@@ -15,10 +15,10 @@ const zoomIn = {
 
 const zoomOut = {
   0: {
-    scale: 0.5,
+    scale: 0.9,
   },
   1: {
-    scale: 0.8,
+    scale: 0.9,
   },
 };
 
@@ -28,7 +28,7 @@ const TrendingItem = ({ activeItem, item,playingItem, setPlaying }) => {
     <Animatable.View
       style={[styles.trendingItem, activeItem === item.$id && styles.activeItem]}
       animation={activeItem === item.$id ? zoomIn : zoomOut}
-      duration={800}
+      duration={1000}
     >
       {isPlaying ? (
         <Video
@@ -108,14 +108,14 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   thumbnailContainer: {
-    width: 350,
-    height: 200,
-    borderRadius: 35,
+    width: 168,
+    height: 268,
+    borderRadius: 14,
     backgroundColor: "white",
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
-    borderWidth: 2,
+    // borderWidth: 1,
     borderColor: "teal",
     padding:"auto"
   },

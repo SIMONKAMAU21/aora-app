@@ -5,6 +5,7 @@ import {
   Image,
   RefreshControl,
   SafeAreaView,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { Text, Badge } from "react-native-paper";
@@ -38,10 +39,10 @@ const HomeScreen = () => {
         console.error("Error fetching current user:", error);
       }
     };
-  
+
     fetchCurrentUser();
-  }, []); // Runs once on mount
-  
+  }, [userimage]); // Runs once on mount
+
   // Include in your onRefresh function:
   const onRefresh = async () => {
     setRefreshing(true);
@@ -49,12 +50,14 @@ const HomeScreen = () => {
     await getCurrentUser(); // Optional: if you want to refetch user data on refresh
     setRefreshing(false);
   };
-  
 
   const handleDelete = async () => {
     await refetch();
   };
-
+  const profile = () => {
+    console.log("clicked");
+    router.push("/profile");
+  };
   return (
     <VideoProvider>
       <SafeAreaView
@@ -67,7 +70,7 @@ const HomeScreen = () => {
             padding: 20,
             position: "relative",
             zIndex: 1000,
-            height:90,
+            height: 90,
           }}
         >
           <View
@@ -84,6 +87,7 @@ const HomeScreen = () => {
               >
                 Welcome back
               </Text>
+              <TouchableOpacity onPress={profile}>
               <View
                 style={{
                   display: "flex",
@@ -99,8 +103,8 @@ const HomeScreen = () => {
                 </Text>
                 <View
                   style={{
-                    width: 40,
-                    height: 40,
+                    width: 30,
+                    height: 30,
                     backgroundColor: "red",
                     borderRadius: 20, // Half of the width and height
                     alignItems: "center",
@@ -119,20 +123,10 @@ const HomeScreen = () => {
                   />
                 </View>
               </View>
+              </TouchableOpacity>
+            
             </View>
-            {latestPosts ? (
-              <Badge
-                style={{
-                  backgroundColor: "orange",
-                  color: "white",
-                  left: "430px",
-                }}
-              >
-                {latestPosts.length}{" "}
-              </Badge>
-            ) : (
-              <Badge> 0</Badge>
-            )}
+
             <View>
               <Image
                 source={images.logoSmall}
@@ -162,7 +156,9 @@ const HomeScreen = () => {
                 >
                   Trending videos
                 </Text>
-                <Trendingvideos posts={latestPosts ?? []} />
+                <View style={{ marginTop: 10 }}>
+                  <Trendingvideos posts={latestPosts ?? []} />
+                </View>
               </View>
             </>
           )}

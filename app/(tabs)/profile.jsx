@@ -25,6 +25,7 @@ import Videos from "../../components/Video";
 import { useGlobalContext } from "../../authContext";
 import Infobox from "../../components/Infobox";
 import { router } from "expo-router";
+import CustomButton from "../../components/CustomButton";
 
 const Profile = () => {
   const { user, setUser, setIsLogged } = useGlobalContext();
@@ -32,7 +33,7 @@ const Profile = () => {
   const { data: totalUniqueLikes } = useAppwrite(() =>
     userLikes(user.accountid)
   );
-
+  const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null); // Holds selected image URI for preview
   const [uploadedImage, setUploadedImage] = useState(user?.avatar); // Holds the uploaded image URI
 
@@ -67,15 +68,18 @@ const Profile = () => {
     try {
       // Ensure that `image` is set to the URI of the picked image
       if (!image) {
-        Alert.alert("Error", "Please select an image first");
+        ToastAndroid.show("Please select an image first", ToastAndroid.LONG);
+        set
         return;
       }
+      setLoading(true);
 
       // Call the update function with the correct arguments
       const avatarUrl = await uploadToCloudinary(image, "image");
       await updateUserProfile(user.$id, avatarUrl);
       setUploadedImage(avatarUrl);
       ToastAndroid.show("Uploaded Successfully", ToastAndroid.LONG);
+      setLoading(false);
     } catch (error) {
       console.warn("Error:", error);
       Alert.alert("Error", "Failed to update profile image");
@@ -167,14 +171,14 @@ const Profile = () => {
                 </Text> */}
               </TouchableOpacity>
 
-              <TouchableOpacity
-                className="mt-4 bg-secondary p-2 rounded"
-                onPress={onSubmit}
-              >
-                <Text className="text-white font-bold text-center">
-                  Update Profile Image
-                </Text>
-              </TouchableOpacity>
+              <CustomButton
+                textStyles="text-pbold text-sm text-white"
+                containerStyles="mt-5"
+                title={loading ? "Updating..." : "Update Profile Image"}
+                handlePress={onSubmit}
+                isLoading={loading}
+                disabled={loading}
+              />
 
               <Infobox
                 title={user?.username || "Anonymous"}
