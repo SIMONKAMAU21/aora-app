@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { Video } from "expo-av";
 import * as FileSystem from "expo-file-system";
+import * as MediaLibrary from "expo-media-library";
 import { icons } from "../constants";
 import {
   deleteVideo,
@@ -20,7 +21,6 @@ import {
   getCurrentUser,
   videoLikes,
 } from "../lib/appwrite";
-import CustomButton from "./CustomButton";
 import { useVideo } from "../videoContext";
 import useAppwrite from "../lib/useAppwrite";
 import { router } from "expo-router";
@@ -33,7 +33,7 @@ const Videos = ({
   const { playVideo, addVideoRef, playingVideoId } = useVideo();
   const avatar = creator?.avatar || "default-avatar-url";
   const username = creator?.username || "Unknown";
-  // const [play, setPlay] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false); // Menu state
   const videoRef = useRef(null);
   const [deleting, setDeleting] = useState(false);
@@ -99,7 +99,6 @@ const Videos = ({
     // setPlay(true);
   };
 
-
   const handleDelete = async () => {
     const videoDocumentId = $id;
     try {
@@ -155,13 +154,31 @@ const Videos = ({
     }
   };
 
-  const cancel = () => {
-    setMenuVisible(false);
-  };
-
   const goProfile = () => {
     router.push("/Profile");
   };
+
+const handleDownload=async()=>{
+  try {
+    setDownloading(true);
+    const {status}= await MediaLibrary.requestPermissionsAsync();
+    if(status!=="granted"){
+      throw new Error("Permission Denied");
+    }
+    const localPath=`${FileSystem.documentDirectory}${title}.mp4`;
+    const downloadResumable=FileSystem.createDownloadResumable(
+      video,
+      localPath
+    )
+    const {uri}=await downloadResumable.downloadAsync();
+    ToastAndroid.show("Video downloaded successfully",ToastAndroid.LONG);
+  } catch (error) {
+    Alert.alert("Error",error.message);
+  }finally{
+    setDownloading(false);
+  }
+}
+
   return (
     <View style={styles.container}>
       {isPlaying ? (
@@ -210,34 +227,41 @@ const Videos = ({
             {username} || {`👍: ${likes}`} {` 👎: ${"0"}`}
           </Text>
         </View>
-      
 
-      <Menu
+        <Menu
           visible={menuVisible}
           onDismiss={() => setMenuVisible(false)}
           anchor={
             <TouchableOpacity onPress={() => setMenuVisible(true)}>
-              <Image source={icons.menu} style={styles.menuIcon} resizeMode="contain" />
+              <Image
+                source={icons.menu}
+                style={styles.menuIcon}
+                resizeMode="contain"
+              />
             </TouchableOpacity>
           }
         >
           {currentUserId === creator?.$id && (
             <Menu.Item
-            leadingIcon={"delete"}
+              leadingIcon={"delete"}
               onPress={handleDelete}
               title={deleting ? "Deleting..." : "Delete"}
             />
           )}
           <Menu.Item
-          leadingIcon="heart"
+            leadingIcon="heart"
             onPress={isSaved ? handleUnsave : handleSave}
             title={saving ? "Processing..." : isSaved ? "Unsave" : "Save"}
           />
-          <Divider/>
-          <Menu.Item  onPress={() => setMenuVisible(false)} title="Cancel" />
+          <Menu.Item
+            leadingIcon="download"
+            onPress={handleDownload}
+            title={downloading ? "Downloading..." : "Download"}
+          />
+          <Divider />
+          <Menu.Item onPress={() => setMenuVisible(false)} title="Cancel" />
         </Menu>
-        </View>
-
+      </View>
     </View>
   );
 };
@@ -260,7 +284,7 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor:"green",
+    borderColor: "green",
     // borderColor: "#ccc",
   },
   avatar: {
@@ -287,17 +311,16 @@ const styles = StyleSheet.create({
     height: 250,
     borderRadius: 10,
     marginTop: 10,
-    borderBottomWidth:1,
-    borderColor:"green",
-    
+    borderBottomWidth: 1,
+    borderColor: "green",
   },
   thumbnailContainer: {
     width: "100%",
     height: 240,
     borderRadius: 10,
     marginTop: 10,
-    borderBottomWidth:1,
-    borderColor:"#ff9d00",
+    borderBottomWidth: 1,
+    borderColor: "#ff9d00",
     position: "relative",
     justifyContent: "center",
     alignItems: "center",

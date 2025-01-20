@@ -26,9 +26,11 @@ import { useGlobalContext } from "../../authContext";
 import Infobox from "../../components/Infobox";
 import { router } from "expo-router";
 import CustomButton from "../../components/CustomButton";
+import { Divider, Menu } from "react-native-paper";
 
 const Profile = () => {
   const { user, setUser, setIsLogged } = useGlobalContext();
+  const [menuVisible, setMenuVisible] = useState(false); // Menu state
   const { data: posts } = useAppwrite(() => getUserposts(user.$id));
   const { data: totalUniqueLikes } = useAppwrite(() =>
     userLikes(user.accountid)
@@ -69,7 +71,6 @@ const Profile = () => {
       // Ensure that `image` is set to the URI of the picked image
       if (!image) {
         ToastAndroid.show("Please select an image first", ToastAndroid.LONG);
-        set
         return;
       }
       setLoading(true);
@@ -99,14 +100,43 @@ const Profile = () => {
                 built with love and owned by @ simon kamau
               </Text>
             </View>
-            <TouchableOpacity onPress={logOut} className="items-end w-full">
-              <Image
-                source={icons.logout}
-                style={{ width: 30, height: 40 }}
-                resizeMode="contain"
+
+            <Menu
+              visible={menuVisible}
+              onDismiss={() => setMenuVisible(false)}
+              anchor={
+                <TouchableOpacity onPress={() => setMenuVisible(true)}>
+                  <Image
+                    source={icons.menu}
+                    style={{
+                      width: 20,
+                      height: 20,
+                      tintColor: "white",
+                      alignSelf: "flex-end",
+                    }}
+                    resizeMode="contain"
+                  />
+                </TouchableOpacity>
+              }
+            >
+              <Menu.Item
+                leadingIcon="logout"
+                onPress={logOut}
+                title={"logout"}
               />
-              <Text>log out</Text>
-            </TouchableOpacity>
+              <Menu.Item
+                leadingIcon="logout"
+                onPress={logOut}
+                title={"logout"}
+              />
+              <Menu.Item
+                leadingIcon="logout"
+                onPress={logOut}
+                title={"logout"}
+              />
+              <Divider />
+              <Menu.Item onPress={() => setMenuVisible(false)} title="Cancel" />
+            </Menu>
 
             <View className="items-center justify-center">
               <TouchableOpacity onPress={openPicker}>
