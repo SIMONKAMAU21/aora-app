@@ -31,12 +31,17 @@ export default function RootLayout() {
       <VideoProvider>
         <PaperProvider>
           <Stack>
-            <Stack.Screen name="index" options={screenOptions} />
+            <Stack.Screen name="index" options={ screenOptions} />
             <Stack.Screen name="(auth)" options={screenOptions} />
             <Stack.Screen name="(tabs)" options={screenOptions} />
             <Stack.Screen
               name="Search/[query]"
               options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="status"
+              // options={{headerShown: false}}
+            
             />
           </Stack>
         </PaperProvider>

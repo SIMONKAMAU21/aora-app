@@ -30,7 +30,6 @@ const HomeScreen = () => {
     const fetchCurrentUser = async () => {
       try {
         const user = await getCurrentUser();
-        console.log("user", user);
         if (user) {
           setUsername(user.username);
           setUserimage(user?.avatar);
