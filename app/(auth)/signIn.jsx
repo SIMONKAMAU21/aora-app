@@ -12,8 +12,8 @@ const Signin = () => {
   const { setUser, setIsLogged } = useGlobalContext();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
-    email: "",
-    password: "",
+    email: "simonkamau7466@gmail.com",
+    password: "12345689",
   });
 
   const submit = async () => {

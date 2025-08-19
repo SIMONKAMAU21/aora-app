@@ -25,7 +25,7 @@ import { useVideo } from "../videoContext";
 import useAppwrite from "../lib/useAppwrite";
 import { router } from "expo-router";
 import { Divider, Menu } from "react-native-paper";
-
+import {thumbnaildefault} from "../assets/images/thumbnail.png"; // Default avatar image
 const Videos = ({
   Video: { $id, title, thumbnail, video, creator },
   onDelete,
@@ -43,7 +43,7 @@ const Videos = ({
   const [currentUserId, setCurrentUserId] = useState(null);
   const { data: likes } = useAppwrite(() => videoLikes($id));
   const isPlaying = playingVideoId === $id;
-
+// console.log('thibmnail', thumbnail,video)
   useEffect(() => {
     const loadVideo = async () => {
       const videoUri = `${FileSystem.documentDirectory}${$id}.mp4`;
@@ -178,7 +178,7 @@ const handleDownload=async()=>{
     setDownloading(false);
   }
 }
-
+// console.log('uri', uri)
   return (
     <View style={styles.container}>
       {isPlaying ? (
@@ -193,13 +193,14 @@ const handleDownload=async()=>{
           onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
           onError={(error) => console.log("Video Error:", error)}
         />
+        
       ) : (
         <TouchableOpacity
           style={styles.thumbnailContainer}
           onPress={handlePlayPress}
         >
           <Image
-            source={{ uri: thumbnail }}
+            source={{ uri: thumbnail || thumbnaildefault }}
             style={styles.thumbnail}
             resizeMode="cover"
           />
@@ -308,11 +309,13 @@ const styles = StyleSheet.create({
   },
   video: {
     width: "100%",
-    height: 250,
+    height: 400,
     borderRadius: 10,
     marginTop: 10,
     borderBottomWidth: 1,
     borderColor: "green",
+    // aspectRatio:  / 16,
+    position: "relative",
   },
   thumbnailContainer: {
     width: "100%",

@@ -30,7 +30,7 @@ import { Divider, Menu } from "react-native-paper";
 
 const Profile = () => {
   const { user, setUser, setIsLogged } = useGlobalContext();
-  const [menuVisible, setMenuVisible] = useState(false); // Menu state
+  const [menuVisible, setMenuVisible] = useState(true); // Menu state
   const { data: posts } = useAppwrite(() => getUserposts(user.$id));
   const { data: totalUniqueLikes } = useAppwrite(() =>
     userLikes(user.accountid)
@@ -124,16 +124,7 @@ const Profile = () => {
                 onPress={logOut}
                 title={"logout"}
               />
-              <Menu.Item
-                leadingIcon="logout"
-                onPress={logOut}
-                title={"logout"}
-              />
-              <Menu.Item
-                leadingIcon="logout"
-                onPress={logOut}
-                title={"logout"}
-              />
+            
               <Divider />
               <Menu.Item onPress={() => setMenuVisible(false)} title="Cancel" />
             </Menu>

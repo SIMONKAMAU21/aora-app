@@ -10,7 +10,11 @@
     },
     "preview": {
       "android": {
-        "buildType": "apk" 
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease",
+        "env": {
+          "EXPO_ANDROID_MIN_SDK_VERSION": "24"
+        }
       },
       "channel": "preview"
     },

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Aora",
     "slug": "aora",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo-small.png",
     "scheme": "aora",
@@ -14,15 +14,22 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.simon.aora"
+      "bundleIdentifier": "com.simon.aora",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/logo-small.png",
-        "backgroundColor": "#ffffff",
-        "resizeMode": "contain"
+        "backgroundColor": "#ffffff"
       },
-      "package": "com.simon.aora"
+      "versionCode": 24,
+      "runtimeVersion": "1.1.0",
+      "package": "com.simon.aora",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "bundler": "metro",

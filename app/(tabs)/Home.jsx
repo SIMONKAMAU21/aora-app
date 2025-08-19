@@ -12,20 +12,23 @@ import { Text, Badge } from "react-native-paper";
 import { images } from "../../constants";
 import Trendingvideos from "../../components/Trendingvideos";
 import Empty from "../../components/Empty";
-import { getLatestPosts, getPosts, getCurrentUser } from "../../lib/appwrite";
+import { getPosts, getCurrentUser } from "../../lib/appwrite";
 import useAppwrite from "../../lib/useAppwrite";
 import Videos from "../../components/Video";
 import Search from "../../components/Search";
 import { router } from "expo-router";
 import { VideoProvider } from "../../videoContext";
-
+import avatar from "../../assets/images/profile.png"; // Default avatar image
+import { getSortedVideos } from "../../utils/video";
 const HomeScreen = () => {
   const { data: posts, refetch } = useAppwrite(getPosts);
-  const { data: latestPosts } = useAppwrite(getLatestPosts);
+  // console.log('posts', posts)
+  const sortedVedios= getSortedVideos(posts)
+
   const [refreshing, setRefreshing] = useState(false);
   const [username, setUsername] = useState("User");
   const [userimage, setUserimage] = useState("user");
-
+  const latestPostsData = sortedVedios?.slice(0, 5) || []; // Limit to 10 posts
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
@@ -41,7 +44,6 @@ const HomeScreen = () => {
 
     fetchCurrentUser();
   }, [userimage]); // Runs once on mount
-
   // Include in your onRefresh function:
   const onRefresh = async () => {
     setRefreshing(true);
@@ -49,7 +51,7 @@ const HomeScreen = () => {
     await getCurrentUser(); // Optional: if you want to refetch user data on refresh
     setRefreshing(false);
   };
-
+// console.log('sortedVedios', sortedVedios)
   const handleDelete = async () => {
     await refetch();
   };
@@ -87,43 +89,42 @@ const HomeScreen = () => {
                 Welcome back
               </Text>
               <TouchableOpacity onPress={profile}>
-              <View
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  padding: "10px",
-                }}
-              >
-                <Text
-                  style={{ fontSize: 32, fontWeight: "bold", color: "white" }}
-                >
-                  {username}
-                </Text>
                 <View
                   style={{
-                    width: 30,
-                    height: 30,
-                    backgroundColor: "red",
-                    borderRadius: 20, // Half of the width and height
+                    display: "flex",
+                    flexDirection: "row",
                     alignItems: "center",
-                    justifyContent: "center",
-                    borderWidth: 1,
+                    padding: "10px",
                   }}
                 >
-                  <Image
-                    source={{ uri: userimage }}
+                  <Text
+                    style={{ fontSize: 32, fontWeight: "bold", color: "white" }}
+                  >
+                    {username}
+                  </Text>
+                  <View
                     style={{
-                      width: "100%",
-                      height: "100%",
-                      borderRadius: 25, // Ensure the image itself is rounded
+                      width: 30,
+                      height: 30,
+                      backgroundColor: "red",
+                      borderRadius: 20, // Half of the width and height
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderWidth: 1,
                     }}
-                    resizeMode="cover"
-                  />
+                  >
+                    <Image
+                      source={{ uri: userimage } || { uri: avatar }}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        borderRadius: 25, // Ensure the image itself is rounded
+                      }}
+                      resizeMode="cover"
+                    />
+                  </View>
                 </View>
-              </View>
               </TouchableOpacity>
-            
             </View>
 
             <View>
@@ -136,7 +137,7 @@ const HomeScreen = () => {
           </View>
         </View>
         <FlatList
-          data={posts}
+          data={sortedVedios}
           keyExtractor={(item) => item.$id}
           renderItem={({ item }) => (
             <Videos Video={item} onDelete={handleDelete} />
@@ -156,7 +157,7 @@ const HomeScreen = () => {
                   Trending videos
                 </Text>
                 <View style={{ marginTop: 10 }}>
-                  <Trendingvideos posts={latestPosts ?? []} />
+                  <Trendingvideos posts={latestPostsData ?? []} />
                 </View>
               </View>
             </>

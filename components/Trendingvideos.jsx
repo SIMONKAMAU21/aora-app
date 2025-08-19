@@ -34,9 +34,10 @@ const TrendingItem = ({ activeItem, item,playingItem, setPlaying }) => {
         <Video
           style={styles.video}
           resizeMode="contain"
-          useNativeControls
+          // useNativeControls
           shouldPlay
           source={{ uri: item.video }}
+        
         />
       ) : (
         <TouchableOpacity
@@ -98,14 +99,21 @@ const styles = StyleSheet.create({
   },
   activeItem: {
     borderColor: "blue",
+      borderColor: "deepskyblue",
+  // borderWidth: 3,
+    shadowColor: "deepskyblue",
+    shadowOffset: { width: 10, height: 600 },
+    shadowOpacity: 0,
+    
 
   },
   video: {
-    width: 350,
-    height: 200,
+    width: "100%",
+    height: 250,
     borderRadius: 10,
     borderColor: "teal",
-    marginTop: 20,
+    // marginTop: 9/16,
+    aspectRatio: 9/ 16,
   },
   thumbnailContainer: {
     width: 168,
@@ -132,6 +140,6 @@ const styles = StyleSheet.create({
     transform: [{ translateX: -25 }, { translateY: -25 }],
   },
   flatListContainer: {
-    // paddingLeft: 170,
+    paddingLeft: 10,
   },
 });
